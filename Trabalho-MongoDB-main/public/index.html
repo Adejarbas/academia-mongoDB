@@ -10,7 +10,7 @@
 </head>
 <body>
     <!-- Dashboard -->
-    <div id="dashboard" class="dashboard-container" style="display: none;">
+    <div id="dashboard" class="dashboard-container">
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -553,5 +553,32 @@
     <div id="overlay" class="overlay"></div>
 
     <script src="main.js"></script>
+    <script>
+        // Verificação simples de login
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard carregado');
+            
+            const token = localStorage.getItem('userToken');
+            const isLoggedIn = localStorage.getItem('gymproLoggedIn');
+            
+            console.log('Token:', token ? 'EXISTE' : 'NÃO EXISTE');
+            console.log('LoggedIn:', isLoggedIn);
+            
+            if (!token || !isLoggedIn) {
+                console.log('❌ Usuário não logado, redirecionando...');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            console.log('✅ Usuário logado, mostrando dashboard');
+            const dashboard = document.getElementById('dashboard');
+            if (dashboard) {
+                dashboard.style.display = 'flex';
+                console.log('✅ Dashboard exibido');
+            } else {
+                console.error('❌ Elemento dashboard não encontrado');
+            }
+        });
+    </script>
 </body>
 </html>

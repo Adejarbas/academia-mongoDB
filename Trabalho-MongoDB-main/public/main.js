@@ -220,6 +220,8 @@ async function initializeApp() {
     }
 
     try {
+        console.log('Usuário logado, mostrando dashboard...');
+        showDashboard(); // MOSTRAR O DASHBOARD
         console.log('Iniciando carregamento dos dados...');
         await loadAllData();
         setupEventListeners();

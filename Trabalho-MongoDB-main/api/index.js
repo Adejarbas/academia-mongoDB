@@ -4,6 +4,7 @@ import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { connectToDatabase } from './config/db.js'
+import authRoutes from './routes/authRoutes.js'
 import alunoRoutes from './routes/alunoRoutes.js'
 import professorRoutes from './routes/professorRoutes.js'
 import treinoRoutes from './routes/treinoRoutes.js'
@@ -21,16 +22,17 @@ const publicPath = path.join(__dirname, '../public')
 // Servir arquivos estáticos (HTML, CSS, JS, imagens)
 app.use(express.static(publicPath))
 
-// Rota raiz para servir index.html
+// Rota raiz para servir home.html como página principal
 app.get('/', (req, res) => {
-  res.sendFile(path.join(publicPath, 'index.html'))
+  res.sendFile(path.join(publicPath, 'home.html'))
 })
 
 // Suas rotas de API
-app.use('/alunos', alunoRoutes)
-app.use('/professores', professorRoutes)
-app.use('/treinos', treinoRoutes)
-app.use('/planos', planoRoutes)
+app.use('/api/auth', authRoutes)
+app.use('/api/alunos', alunoRoutes)
+app.use('/api/professores', professorRoutes)
+app.use('/api/treinos', treinoRoutes)
+app.use('/api/planos', planoRoutes)
 
 // Middleware de erro
 app.use((err, req, res, next) => {
@@ -50,4 +52,19 @@ export default async function handler(req, res) {
     isConnected = true
   }
   app(req, res)
+}
+
+// Para desenvolvimento local
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000
+  
+  connectToDatabase().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor rodando na porta ${PORT}`)
+      console.log(`📱 Acesse: http://localhost:${PORT}/home.html`)
+    })
+  }).catch(error => {
+    console.error('❌ Erro ao iniciar servidor:', error)
+    process.exit(1)
+  })
 }

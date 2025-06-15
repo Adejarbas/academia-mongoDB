@@ -353,8 +353,7 @@
             loading = true;
             submitBtn.disabled = true;
             submitBtn.textContent = 'Carregando...';
-            
-            try {
+              try {
                 if (isLogin) {
                     // LOGIN REAL
                     const response = await fetch('/api/auth/login', {
@@ -366,23 +365,40 @@
                             email: email,
                             password: password
                         })
-                    });                    const data = await response.json();
-                    
-                    console.log('=== RESPOSTA DO LOGIN ===');
+                    });
+
+                    console.log('=== RESPOSTA RAW ===');
                     console.log('Status:', response.status);
                     console.log('OK:', response.ok);
-                    console.log('Data:', data);
 
-                    if (response.ok) {
+                    let data;
+                    try {
+                        data = await response.json();
+                        console.log('=== DADOS PARSEADOS ===');
+                        console.log('Data:', data);
+                    } catch (parseError) {
+                        console.error('❌ Erro ao parsear JSON:', parseError);
+                        alert('Erro ao processar resposta do servidor');
+                        return;
+                    }
+
+                    if (response.ok && data && data.success) {
                         console.log('✅ Login bem-sucedido!');
+                        
+                        // Verificar se os dados existem
+                        if (!data.data || !data.data.user || !data.data.token) {
+                            console.error('❌ Dados incompletos na resposta:', data);
+                            alert('Erro: Dados de login incompletos');
+                            return;
+                        }
                         
                         // Salvar dados do usuário no localStorage
                         localStorage.setItem('gymproLoggedIn', 'true');
-                        localStorage.setItem('userToken', data.token);
-                        localStorage.setItem('userRole', data.user.role);
-                        localStorage.setItem('userId', data.user.id);
-                        localStorage.setItem('userName', data.user.name);
-                        localStorage.setItem('userEmail', data.user.email);
+                        localStorage.setItem('userToken', data.data.token);
+                        localStorage.setItem('userRole', data.data.user.role);
+                        localStorage.setItem('userId', data.data.user.id);
+                        localStorage.setItem('userName', data.data.user.name);
+                        localStorage.setItem('userEmail', data.data.user.email);
                         localStorage.setItem('lastLoginTime', new Date().getTime().toString());
 
                         console.log('💾 Dados salvos no localStorage:');
@@ -390,17 +406,15 @@
                         console.log('- Role:', localStorage.getItem('userRole'));
                         console.log('- UserId:', localStorage.getItem('userId'));
                         console.log('- UserName:', localStorage.getItem('userName'));
-                        
-                        alert('Login realizado! Redirecionando para o dashboard...');
-                        
-                        console.log('🔀 Redirecionando para index.html...');
-                          // Redirecionar para o dashboard
-                        window.location.href = 'index.html';
+                          alert('Login realizado! Redirecionando para o dashboard...');
+                        console.log('🔀 Redirecionando para dashboard...');
+                        window.location.href = '/index.html';
                     } else {
                         console.log('❌ Erro no login:');
                         console.log('Status:', response.status);
                         console.log('StatusText:', response.statusText);
-                        console.log('Data:', data);                        alert('Erro no login: ' + (data.message || 'Erro desconhecido'));
+                        console.log('Data:', data);
+                        alert('Erro no login: ' + (data.message || 'Erro desconhecido'));
                     }
                 } else {
                     // CADASTRO REAL
@@ -419,21 +433,18 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        // Cadastro realizado com sucesso, fazer login automático
                         localStorage.setItem('gymproLoggedIn', 'true');
-                        localStorage.setItem('userToken', data.token);
-                        localStorage.setItem('userRole', data.user.role);
-                        localStorage.setItem('userId', data.user.id);
-                        localStorage.setItem('userName', data.user.name);
-                        localStorage.setItem('userEmail', data.user.email);
+                        localStorage.setItem('userToken', data.data.token);
+                        localStorage.setItem('userRole', data.data.user.role);
+                        localStorage.setItem('userId', data.data.user.id);
+                        localStorage.setItem('userName', data.data.user.name);
+                        localStorage.setItem('userEmail', data.data.user.email);
                         localStorage.setItem('lastLoginTime', new Date().getTime().toString());
 
-                        console.log('Cadastro realizado com sucesso:', data.user);
-                        alert('Conta criada com sucesso! Você será redirecionado para o dashboard.');
-                        
-                        // Redirecionar para o dashboard
-                        window.location.href = 'index.html';
-                    } else {                        alert('Erro no cadastro: ' + data.message);
+                        console.log('Cadastro realizado com sucesso:', data.data.user);                        alert('Conta criada com sucesso! Você será redirecionado para o dashboard.');
+                        window.location.href = '/index.html';
+                    } else {
+                        alert('Erro no cadastro: ' + data.message);
                     }
                 }
             } catch (error) {
@@ -444,12 +455,10 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = isLogin ? 'Entrar' : 'Cadastrar';
             }
-        });
-
-        // Check if already logged in
-        if (localStorage.getItem('gymproLoggedIn')) {
-            window.location.href = 'index.html';
-        }
+        });        // Check if already logged in
+        // if (localStorage.getItem('gymproLoggedIn')) {
+        //     window.location.href = 'index.html';
+        // }
     </script>
 </body>
 </html>
