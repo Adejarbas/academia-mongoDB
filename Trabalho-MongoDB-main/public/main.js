@@ -685,6 +685,12 @@ function openModal(modalId) {
                 clearExerciciosList();
             }
         }
+        
+        // Popular selects específicos para modal de atribuição de plano
+        if (modalId === 'atribuir-plano-modal') {
+            console.log('🔧 openModal detectou atribuir-plano-modal, populando selects...');
+            populateAtribuirSelects();
+        }
     }
 }
 
@@ -1360,18 +1366,37 @@ function setupExercicioInputListener() {
 // ==================== SISTEMA DE PLANOS E ATRIBUIÇÕES ====================
 
 // Função para validar e abrir modal de atribuição de plano
-function openAtribuirPlanoModal() {
-    // Verificar se existem planos
+async function openAtribuirPlanoModal() {
+    console.log('🎯 openAtribuirPlanoModal() chamada');
+    console.log('📊 Verificando dados disponíveis...');
+    console.log('📊 data.planos:', data.planos?.length || 0, 'planos');
+    console.log('📊 data.alunos:', data.alunos?.length || 0, 'alunos');
+    
+    // Se os dados não estão carregados, tentar carregá-los
+    if ((!data.planos || data.planos.length === 0) || (!data.alunos || data.alunos.length === 0)) {
+        console.log('⚠️ Dados não carregados, tentando recarregar...');
+        
+        const success = await reloadSpecificData(['alunos', 'planos']);
+        if (!success) {
+            showError('Erro ao carregar dados necessários para atribuição de plano.');
+            return;
+        }
+    }
+    
+    // Verificar novamente após tentativa de carregamento
     if (!data.planos || data.planos.length === 0) {
-        alert('Adicione planos, antes de atribuir');
+        console.log('❌ Nenhum plano encontrado após carregamento');
+        alert('Adicione planos antes de atribuir. Navegue para a seção de planos para criar um novo plano.');
         return;
     }
     
-    // Verificar se existem alunos
     if (!data.alunos || data.alunos.length === 0) {
-        alert('Adicione alunos, antes de atribuir planos');
+        console.log('❌ Nenhum aluno encontrado após carregamento');
+        alert('Adicione alunos antes de atribuir planos. Navegue para a seção de alunos para criar um novo aluno.');
         return;
     }
+    
+    console.log('✅ Dados disponíveis, populando selects...');
     
     // Popular os selects
     populateAtribuirSelects();
@@ -1382,6 +1407,8 @@ function openAtribuirPlanoModal() {
     if (dataInput) {
         dataInput.value = today;
     }
+    
+    console.log('🔧 Abrindo modal atribuir-plano-modal...');
     
     // Abrir modal
     openModal('atribuir-plano-modal');
@@ -1394,25 +1421,53 @@ function renderPlanosAlunos() {
         console.log('Elemento planos-alunos-list não encontrado');
         return;
     }
-    
-    try {
+      try {
+        console.log('🔗 Renderizando planos-alunos. Total:', data.planosAlunos.length);
+        console.log('🔗 Alunos disponíveis:', data.alunos.length);
+        console.log('🔗 Planos disponíveis:', data.planos.length);
+        
         if (!data.planosAlunos || data.planosAlunos.length === 0) {
             planosAlunosList.innerHTML = '<div class="empty-state">Nenhum plano atribuído ainda</div>';
             return;
-        }        planosAlunosList.innerHTML = '';
-        data.planosAlunos.forEach(planoAluno => {
+        }        planosAlunosList.innerHTML = '';        data.planosAlunos.forEach(planoAluno => {
             const card = document.createElement('div');
             card.className = 'plano-aluno-card';
+              console.log('🔍 Processando plano-aluno:', planoAluno);
+            
+            // Buscar tanto por 'aluno'/'plano' quanto por 'alunoId'/'planoId'
+            const alunoIdRaw = planoAluno.aluno || planoAluno.alunoId;
+            const planoIdRaw = planoAluno.plano || planoAluno.planoId;
+            
+            console.log('🔍 Aluno ID no plano-aluno (raw):', alunoIdRaw);
+            console.log('🔍 Plano ID no plano-aluno (raw):', planoIdRaw);
+            console.log('🔍 IDs dos alunos disponíveis:', data.alunos.map(a => a._id));
+            console.log('🔍 IDs dos planos disponíveis:', data.planos.map(p => p._id));
+            
+            // Fazer lookup manual para buscar dados do aluno e plano
+            // Converter para string para garantir compatibilidade
+            const alunoId = alunoIdRaw ? alunoIdRaw.toString() : '';
+            const planoId = planoIdRaw ? planoIdRaw.toString() : '';
+            
+            const aluno = data.alunos.find(a => a._id.toString() === alunoId);
+            const plano = data.planos.find(p => p._id.toString() === planoId);
+            
+            console.log('🔍 Aluno encontrado:', aluno);
+            console.log('🔍 Plano encontrado:', plano);
+            
+            const alunoNome = aluno ? aluno.nome : `Aluno não encontrado (ID: ${alunoId})`;
+            const planoNome = plano ? plano.nome : `Plano não encontrado (ID: ${planoId})`;
+            const planoPreco = plano ? plano.preco : 0;
+            const planoDuracao = plano ? plano.duracaoMeses : 0;
             
             const dataInicio = planoAluno.dataInicio ? new Date(planoAluno.dataInicio).toLocaleDateString('pt-BR') : 'N/A';
             const status = planoAluno.status || 'ATIVO';
             
             card.innerHTML = `
                 <div class="plano-aluno-info">
-                    <h3>${planoAluno.alunoInfo?.nome || 'N/A'}</h3>
-                    <p><strong>Plano:</strong> ${planoAluno.planoInfo?.nome || 'N/A'}</p>
-                    <p><strong>Preço:</strong> R$ ${planoAluno.planoInfo?.preco || '0,00'}</p>
-                    <p><strong>Duração:</strong> ${planoAluno.planoInfo?.duracaoMeses || 'N/A'} meses</p>
+                    <h3>${alunoNome}</h3>
+                    <p><strong>Plano:</strong> ${planoNome}</p>
+                    <p><strong>Preço:</strong> R$ ${planoPreco.toFixed(2).replace('.', ',')}</p>
+                    <p><strong>Duração:</strong> ${planoDuracao} meses</p>
                     <p><strong>Início:</strong> ${dataInicio}</p>
                     <span class="status-badge status-${status.toLowerCase()}">${status}</span>
                 </div>
@@ -1436,35 +1491,61 @@ function renderPlanosAlunos() {
 // Função para popular selects do modal de atribuição
 function populateAtribuirSelects() {
     try {
+        console.log('🔄 populateAtribuirSelects() chamada');
+        console.log('📊 data.alunos:', data.alunos?.length || 0, 'alunos');
+        console.log('📊 data.planos:', data.planos?.length || 0, 'planos');
+        
         // Popular select de alunos
         const selectAluno = document.getElementById('atribuir-aluno');
-        if (selectAluno && data.alunos) {
+        console.log('🎯 selectAluno element:', selectAluno);
+        
+        if (selectAluno) {
             selectAluno.innerHTML = '<option value="">Selecione um aluno</option>';
-            data.alunos.forEach(aluno => {
-                if (aluno && aluno._id && aluno.nome) {
-                    const option = document.createElement('option');
-                    option.value = aluno._id;
-                    option.textContent = aluno.nome;
-                    selectAluno.appendChild(option);
-                }
-            });
+            
+            if (data.alunos && data.alunos.length > 0) {
+                data.alunos.forEach(aluno => {
+                    if (aluno && aluno._id && aluno.nome) {
+                        const option = document.createElement('option');
+                        option.value = aluno._id;
+                        option.textContent = aluno.nome;
+                        selectAluno.appendChild(option);
+                    }
+                });
+                console.log(`✅ Adicionados ${data.alunos.length} alunos ao select de atribuição`);
+            } else {
+                console.log('❌ Nenhum aluno encontrado para popular o select de atribuição');
+            }
+        } else {
+            console.log('❌ Select atribuir-aluno não encontrado no DOM');
         }
         
         // Popular select de planos
         const selectPlano = document.getElementById('atribuir-plano');
-        if (selectPlano && data.planos) {
+        console.log('🎯 selectPlano element:', selectPlano);
+        
+        if (selectPlano) {
             selectPlano.innerHTML = '<option value="">Selecione um plano</option>';
-            data.planos.forEach(plano => {
-                if (plano && plano._id && plano.nome) {
-                    const option = document.createElement('option');
-                    option.value = plano._id;
-                    option.textContent = `${plano.nome} - R$ ${plano.preco || '0,00'}`;
-                    selectPlano.appendChild(option);
-                }
-            });
+            
+            if (data.planos && data.planos.length > 0) {
+                data.planos.forEach(plano => {
+                    if (plano && plano._id && plano.nome) {
+                        const option = document.createElement('option');
+                        option.value = plano._id;
+                        option.textContent = `${plano.nome} - R$ ${plano.preco || '0,00'}`;
+                        selectPlano.appendChild(option);
+                    }
+                });
+                console.log(`✅ Adicionados ${data.planos.length} planos ao select de atribuição`);
+            } else {
+                console.log('❌ Nenhum plano encontrado para popular o select de atribuição');
+            }
+        } else {
+            console.log('❌ Select atribuir-plano não encontrado no DOM');
         }
+        
+        console.log('✅ populateAtribuirSelects() finalizada');
     } catch (error) {
-        console.error('Erro ao popular selects de atribuição:', error);
+        console.error('❌ Erro ao popular selects de atribuição:', error);
     }
 }
 
@@ -1491,7 +1572,7 @@ async function submitAtribuirPlanoForm() {
     console.log('Dados processados:', atribuicaoData);
 
     try {
-        const url = editId ? `/api/planos-alunos/${editId}` : '/api/planos-alunos';
+        const url = editId ? `/api/plano-alunos/${editId}` : '/api/plano-alunos';
         const method = editId ? 'PUT' : 'POST';
         
         console.log('URL:', url);
@@ -1530,29 +1611,48 @@ async function submitAtribuirPlanoForm() {
 // Função para editar atribuição de plano
 async function editPlanoAluno(id) {
     try {
-        const response = await fetch(`/api/planos-alunos/${id}`, {
+        const response = await fetch(`/api/plano-alunos/${id}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('userToken')}`
             }
         });
-        
-        if (response.ok) {
+          if (response.ok) {
             const planoAluno = await response.json();
+            console.log('📝 Dados do plano-aluno para editar:', planoAluno);
             
             // Popular selects primeiro
             populateAtribuirSelects();
-              // Preencher o formulário
-            document.getElementById('atribuir-aluno').value = planoAluno.aluno || '';
-            document.getElementById('atribuir-plano').value = planoAluno.plano || '';
-            document.getElementById('atribuir-data').value = planoAluno.dataInicio ? 
-                new Date(planoAluno.dataInicio).toISOString().split('T')[0] : '';
-            document.getElementById('atribuir-status').value = planoAluno.status || 'ATIVO';
             
-            // Configurar modo de edição
-            const form = document.getElementById('atribuir-plano-form');
-            form.dataset.editId = id;
-            
-            openModal('atribuir-plano-modal');
+            // Aguardar um pouco para garantir que os selects foram populados
+            setTimeout(() => {
+                // Verificar se os elementos existem antes de preencher
+                const alunoSelect = document.getElementById('atribuir-aluno');
+                const planoSelect = document.getElementById('atribuir-plano');
+                const dataInput = document.getElementById('atribuir-data');
+                const statusSelect = document.getElementById('atribuir-status');
+                
+                console.log('📝 Elementos do formulário:', {
+                    alunoSelect: !!alunoSelect,
+                    planoSelect: !!planoSelect,
+                    dataInput: !!dataInput,
+                    statusSelect: !!statusSelect
+                });
+                
+                // Preencher o formulário apenas se os elementos existirem
+                if (alunoSelect) alunoSelect.value = planoAluno.aluno || '';
+                if (planoSelect) planoSelect.value = planoAluno.plano || '';
+                if (dataInput) dataInput.value = planoAluno.dataInicio ? 
+                    new Date(planoAluno.dataInicio).toISOString().split('T')[0] : '';
+                if (statusSelect) statusSelect.value = planoAluno.status || 'ATIVO';
+                
+                // Configurar modo de edição
+                const form = document.getElementById('atribuir-plano-form');
+                if (form) {
+                    form.dataset.editId = id;
+                }
+                
+                openModal('atribuir-plano-modal');
+            }, 300);
         } else {
             alert('Erro ao carregar dados da atribuição');
         }
@@ -1566,7 +1666,7 @@ async function editPlanoAluno(id) {
 async function deletePlanoAluno(id) {
     if (confirm('Tem certeza que deseja remover esta atribuição de plano?')) {
         try {
-            const response = await fetch(`/api/planos-alunos/${id}`, {
+            const response = await fetch(`/api/plano-alunos/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('userToken')}`
@@ -2193,4 +2293,45 @@ function renderFilteredTreinos() {
         `;
         treinosList.appendChild(card);
     });
+}
+
+// ===== FUNÇÕES UTILITÁRIAS PARA RECARREGAMENTO DE DADOS =====
+
+// Função para recarregar dados específicos
+async function reloadSpecificData(dataTypes = ['alunos', 'planos']) {
+    try {
+        console.log('🔄 Recarregando dados específicos:', dataTypes);
+        
+        for (const type of dataTypes) {
+            switch (type) {
+                case 'alunos':
+                    if (!data.alunos || data.alunos.length === 0) {
+                        console.log('🔄 Recarregando alunos...');
+                        data.alunos = await fetchData('api/alunos') || [];
+                        console.log('✅ Alunos recarregados:', data.alunos.length);
+                    }
+                    break;
+                case 'planos':
+                    if (!data.planos || data.planos.length === 0) {
+                        console.log('🔄 Recarregando planos...');
+                        data.planos = await fetchData('api/planos') || [];
+                        console.log('✅ Planos recarregados:', data.planos.length);
+                    }
+                    break;
+                case 'professores':
+                    if (!data.professores || data.professores.length === 0) {
+                        console.log('🔄 Recarregando professores...');
+                        data.professores = await fetchData('api/professores') || [];
+                        console.log('✅ Professores recarregados:', data.professores.length);
+                    }
+                    break;
+            }
+        }
+        
+        console.log('✅ Recarregamento específico concluído');
+        return true;
+    } catch (error) {
+        console.error('❌ Erro no recarregamento específico:', error);
+        return false;
+    }
 }

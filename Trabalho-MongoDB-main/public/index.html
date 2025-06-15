@@ -266,7 +266,7 @@
                     <div class="section-header">
                         <h2>Gerenciar Planos</h2>
                         <div class="button-group">
-                            <button class="btn btn-success" onclick="openModal('atribuir-plano-modal')">
+                            <button class="btn btn-success" onclick="openAtribuirPlanoModal()">
                                 <i class="fas fa-user"></i>
                                 Atribuir Plano
                             </button>
@@ -512,6 +512,14 @@
                 <div class="form-group">
                     <label for="atribuir-data">Data de Início:</label>
                     <input type="date" id="atribuir-data" name="dataInicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="atribuir-status">Status:</label>
+                    <select id="atribuir-status" name="status">
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="VENCIDO">VENCIDO</option>
+                        <option value="CANCELADO">CANCELADO</option>
+                    </select>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-success">Atribuir Plano</button>
