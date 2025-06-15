@@ -1,3 +1,12 @@
+// ===== CONFIGURAÇÕES GLOBAIS =====
+const CONFIG = {
+    BASE_URL: window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000' 
+        : 'https://trabalho-mongo-db.vercel.app',
+    TOKEN_EXPIRY_HOURS: 24,
+    DEBUG: window.location.hostname === 'localhost' // Logs apenas em dev
+};
+
 // Global Data Storage
 let data = {
     alunos: [],
@@ -11,6 +20,26 @@ let currentEditId = null;
 let currentEditType = null;
 let treinoExercicios = []; // Array para armazenar exercícios do treino atual
 
+// ===== UTILITÁRIOS CENTRALIZADOS =====
+
+// Função debounce para melhorar performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Base URL centralizada
+function getBaseUrl() {
+    return CONFIG.BASE_URL;
+}
+
 function checkTokenExpiration() {
     const lastLoginTime = localStorage.getItem('lastLoginTime');
     if (!lastLoginTime) return true;
@@ -20,10 +49,12 @@ function checkTokenExpiration() {
     const loginTime = parseInt(lastLoginTime);
     const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
 
-    return hoursSinceLogin >= 24;
+    return hoursSinceLogin >= CONFIG.TOKEN_EXPIRY_HOURS;
 }
 
 function showError(message, isTokenExpired = false) {
+    if (CONFIG.DEBUG) console.error('🚨 Erro:', message);
+    
     // Se o token expirou, redireciona para login
     if (isTokenExpired) {
         alert('Sua sessão expirou. Por favor, faça login novamente.');
@@ -62,9 +93,7 @@ function createErrorElement() {
 
 // API Functions
 async function sendData(url, method, data) {
-    const baseUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3000' 
-        : 'https://trabalho-mongo-db.vercel.app';
+    const baseUrl = getBaseUrl();
         
     try {
         if (checkTokenExpiration()) {
@@ -76,8 +105,10 @@ async function sendData(url, method, data) {
             throw new Error('Token não encontrado');
         }
 
-        console.log('Enviando requisição para:', `${baseUrl}/${url}`);
-        console.log('Dados:', data);
+        if (CONFIG.DEBUG) {
+            console.log('📤 Enviando requisição para:', `${baseUrl}/${url}`);
+            console.log('📋 Dados:', data);
+        }
         
         const response = await fetch(`${baseUrl}/${url}`, {
             method: method,
@@ -107,9 +138,7 @@ async function sendData(url, method, data) {
 }
 
 async function fetchData(endpoint) {
-    const baseUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3000' 
-        : 'https://trabalho-mongo-db.vercel.app';
+    const baseUrl = getBaseUrl();
         
     try {
         if (checkTokenExpiration()) {
@@ -121,7 +150,7 @@ async function fetchData(endpoint) {
             throw new Error('Token não encontrado');
         }
 
-        console.log(`Buscando dados de: ${baseUrl}/${endpoint}`);
+        if (CONFIG.DEBUG) console.log(`📥 Buscando dados de: ${baseUrl}/${endpoint}`);
         
         const response = await fetch(`${baseUrl}/${endpoint}`, {
             headers: {
@@ -138,7 +167,7 @@ async function fetchData(endpoint) {
         }
         
         const responseData = await response.json();
-        console.log(`Dados recebidos de ${endpoint}:`, responseData);
+        if (CONFIG.DEBUG) console.log(`✅ Dados recebidos de ${endpoint}:`, responseData);
         return responseData;
     } catch (error) {
         console.error(`Erro ao carregar ${endpoint}:`, error);
@@ -154,38 +183,73 @@ async function fetchData(endpoint) {
 // Load Data Functions
 async function loadAllData() {
     try {
-        console.log('Iniciando carregamento de dados...');
+        if (CONFIG.DEBUG) console.log('🚀 Iniciando carregamento de dados...');
         
         const alunos = await fetchData('api/alunos');
-        console.log('Alunos carregados:', alunos);
+        if (CONFIG.DEBUG) console.log('👥 Alunos carregados:', alunos);
         data.alunos = alunos || [];
         
         const professores = await fetchData('api/professores');
-        console.log('Professores carregados:', professores);
+        if (CONFIG.DEBUG) console.log('👨‍🏫 Professores carregados:', professores);
         data.professores = professores || [];
         
         const treinos = await fetchData('api/treinos');
-        console.log('Treinos carregados:', treinos);
-        data.treinos = treinos || [];        const planos = await fetchData('api/planos');
-        console.log('Planos carregados:', planos);
+        if (CONFIG.DEBUG) console.log('💪 Treinos carregados:', treinos);
+        data.treinos = treinos || [];
+        
+        const planos = await fetchData('api/planos');
+        if (CONFIG.DEBUG) console.log('📋 Planos carregados:', planos);
         data.planos = planos || [];
         
-        const planosAlunos = await fetchData('api/planos-alunos');
-        console.log('Planos-Alunos carregados:', planosAlunos);
-        data.planosAlunos = planosAlunos || [];// Atualizar interface
-        try { renderAlunos(); } catch (e) { console.error('Erro ao renderizar alunos:', e); }
-        try { renderProfessores(); } catch (e) { console.error('Erro ao renderizar professores:', e); }
-        try { renderTreinos(); } catch (e) { console.error('Erro ao renderizar treinos:', e); }
-        try { renderPlanos(); } catch (e) { console.error('Erro ao renderizar planos:', e); }
-        try { renderPlanosAlunos(); } catch (e) { console.error('Erro ao renderizar planos-alunos:', e); }
-        try { updateStats(); } catch (e) { console.error('Erro ao atualizar stats:', e); }
-          // Popular selects para modais (caso já estejam abertos)
-        try { populateSelectProfessores(); } catch (e) { console.error('Erro ao popular select professores:', e); }
-        try { populateSelectAlunos(); } catch (e) { console.error('Erro ao popular select alunos:', e); }
+        const planosAlunos = await fetchData('api/plano-alunos');
+        if (CONFIG.DEBUG) console.log('🔗 Planos-Alunos carregados:', planosAlunos);
+        data.planosAlunos = planosAlunos || [];
+
+        // Atualizar interface com tratamento de erro individual
+        const renderFunctions = [
+            { name: 'renderAlunos', func: renderAlunos },
+            { name: 'renderProfessores', func: renderProfessores },
+            { name: 'renderTreinos', func: renderTreinos },
+            { name: 'renderPlanos', func: renderPlanos },
+            { name: 'renderPlanosAlunos', func: renderPlanosAlunos },
+            { name: 'updateStats', func: updateStats }
+        ];
+
+        renderFunctions.forEach(({ name, func }) => {
+            try { 
+                func(); 
+            } catch (e) { 
+                console.error(`❌ Erro em ${name}:`, e); 
+            }
+        });
+        
+        // Popular selects para modais (caso já estejam abertos)
+        const setupFunctions = [
+            { name: 'populateSelectProfessores', func: populateSelectProfessores },
+            { name: 'populateSelectAlunos', func: populateSelectAlunos }
+        ];
+
+        setupFunctions.forEach(({ name, func }) => {
+            try { 
+                func(); 
+            } catch (e) { 
+                console.error(`❌ Erro em ${name}:`, e); 
+            }
+        });
         
         // Configurar sistema de busca após carregar dados
-        try { setupAlunosSearch(); } catch (e) { console.error('Erro ao configurar busca de alunos:', e); }
-        try { setupProfessoresSearch(); } catch (e) { console.error('Erro ao configurar busca de professores:', e); }
+        const searchFunctions = [
+            { name: 'setupAlunosSearch', func: setupAlunosSearch },
+            { name: 'setupProfessoresSearch', func: setupProfessoresSearch }
+        ];
+
+        searchFunctions.forEach(({ name, func }) => {
+            try { 
+                func(); 
+            } catch (e) { 
+                console.error(`❌ Erro em ${name}:`, e); 
+            }
+        });
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
         const isTokenError = error.message.includes('Token');
@@ -204,28 +268,28 @@ function handleLogout() {
 
 // Initialize App
 async function initializeApp() {
-    console.log('Iniciando aplicação...');
+    if (CONFIG.DEBUG) console.log('🚀 Iniciando aplicação...');
     
     if (checkTokenExpiration()) {
-        console.log('Token expirado, redirecionando para login...');
+        if (CONFIG.DEBUG) console.log('⏰ Token expirado, redirecionando para login...');
         handleLogout();
         return;
     }
 
     const token = localStorage.getItem('userToken');
     if (!token) {
-        console.log('Token não encontrado, redirecionando para login...');
+        if (CONFIG.DEBUG) console.log('🔑 Token não encontrado, redirecionando para login...');
         window.location.href = 'login.html';
         return;
     }
 
     try {
-        console.log('Iniciando carregamento dos dados...');
+        if (CONFIG.DEBUG) console.log('📊 Iniciando carregamento dos dados...');
         await loadAllData();
         setupEventListeners();
-        console.log('Dados carregados com sucesso!');
+        if (CONFIG.DEBUG) console.log('✅ Dados carregados com sucesso!');
     } catch (error) {
-        console.error('Erro ao carregar dados:', error);
+        console.error('❌ Erro ao carregar dados:', error);
         const isTokenError = error.message.includes('Token');
         showError('Erro ao carregar dados. Tente novamente mais tarde.', isTokenError);
     }
@@ -233,8 +297,9 @@ async function initializeApp() {
 
 // Carregar dados quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
+    if (CONFIG.DEBUG) console.log('📄 DOM carregado, inicializando aplicação...');
     initializeApp().catch(error => {
-        console.error('Erro na inicialização:', error);
+        console.error('❌ Erro na inicialização:', error);
         const isTokenError = error.message.includes('Token');
         showError('Erro na inicialização da aplicação.', isTokenError);
     });
@@ -431,7 +496,7 @@ function renderTreinos() {
         `;
         treinosList.appendChild(card);
     });
-}
+
 
 function renderPlanos() {
     const planosList = document.getElementById('planos-disponiveis-list');
@@ -465,25 +530,31 @@ function renderPlanos() {
 
 function updateStats() {
     try {
-        const totalAlunos = document.getElementById('total-alunos');
-        const totalProfessores = document.getElementById('total-professores');
-        const totalTreinos = document.getElementById('total-treinos');
-        const totalPlanos = document.getElementById('total-planos');
-        
-        if (totalAlunos && data.alunos) totalAlunos.textContent = data.alunos.length;
-        if (totalProfessores && data.professores) totalProfessores.textContent = data.professores.length;
-        if (totalTreinos && data.treinos) totalTreinos.textContent = data.treinos.length;
-        if (totalPlanos && data.planos) totalPlanos.textContent = data.planos.length;
+        const stats = [
+            { id: 'total-alunos', data: data.alunos, name: 'alunos' },
+            { id: 'total-professores', data: data.professores, name: 'professores' },
+            { id: 'total-treinos', data: data.treinos, name: 'treinos' },
+            { id: 'total-planos', data: data.planos, name: 'planos' }
+        ];
+
+        stats.forEach(({ id, data: entityData, name }) => {
+            const element = document.getElementById(id);
+            if (element && entityData) {
+                element.textContent = entityData.length;
+            }
+        });
+
+        if (CONFIG.DEBUG) {
+            console.log('📊 Estatísticas atualizadas:', {
+                alunos: data.alunos.length,
+                professores: data.professores.length,
+                treinos: data.treinos.length,
+                planos: data.planos.length
+            });
+        }
     } catch (error) {
-        console.error('Erro ao atualizar estatísticas:', error);
+        console.error('❌ Erro ao atualizar estatísticas:', error);
     }
-    
-    console.log('Estatísticas atualizadas:', {
-        alunos: data.alunos.length,
-        professores: data.professores.length,
-        treinos: data.treinos.length,
-        planos: data.planos.length
-    });
 }
 
 function setupEventListeners() {
@@ -493,10 +564,9 @@ function setupEventListeners() {
     // Configurar navegação
     setupNavigation();
       // Configurar menu mobile
-    setupMobileMenu();      // Configurar sistema de busca
+    setupMobileMenu();    // Configurar sistema de busca
     setupAlunosSearch();
     setupProfessoresSearch();
-    setupTreinosSearch();
     setupTreinosSearch();
     
     // Botões de logout
@@ -1612,10 +1682,9 @@ function renderFilteredAlunos() {
             idade = idade + ' anos';
         }
         
-        card.innerHTML = `
-            <div class="item-info">
-                <h3>${highlightSearchTerm(aluno.nome || 'N/A')}</h3>
-                <p>${highlightSearchTerm(aluno.email || 'N/A')}</p>
+        card.innerHTML = `            <div class="item-info">
+                <h3>${highlightSearchTermAlunos(aluno.nome || 'N/A')}</h3>
+                <p>${highlightSearchTermAlunos(aluno.email || 'N/A')}</p>
                 <p>Telefone: ${aluno.telefone || 'N/A'} | Idade: ${idade}</p>
                 <p>Nascimento: ${aluno.dataNascimento ? new Date(aluno.dataNascimento).toLocaleDateString('pt-BR') : 'N/A'} | Peso: ${aluno.peso || 'N/A'}kg</p>
             </div>
@@ -1633,12 +1702,29 @@ function renderFilteredAlunos() {
 }
 
 // Destacar termo de busca
-function highlightSearchTerm(text) {
-    const searchTerm = document.getElementById('alunos-search')?.value;
+// Função genérica para destacar termos de busca
+function highlightSearchTerm(text, searchInputId) {
+    const searchInput = document.getElementById(searchInputId);
+    const searchTerm = searchInput?.value;
     if (!searchTerm || !text) return text;
     
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     return text.replace(regex, '<mark>$1</mark>');
+}
+
+// Função específica para alunos (mantida para compatibilidade)
+function highlightSearchTermAlunos(text) {
+    return highlightSearchTerm(text, 'alunos-search');
+}
+
+// Função específica para professores (mantida para compatibilidade)
+function highlightSearchTermProfessores(text) {
+    return highlightSearchTerm(text, 'professores-search');
+}
+
+// Função específica para treinos (mantida para compatibilidade)
+function highlightSearchTermTreinos(text) {
+    return highlightSearchTerm(text, 'treinos-search');
 }
 
 // Atualizar função renderAlunos original para usar os filtros
@@ -1803,14 +1889,6 @@ function renderFilteredProfessores() {
 }
 
 // Destacar termo de busca para professores
-function highlightSearchTermProfessores(text) {
-    const searchTerm = document.getElementById('professores-search')?.value;
-    if (!searchTerm || !text) return text;
-    
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
-}
-
 // Atualizar função renderProfessores original para usar os filtros
 function renderProfessores() {
     // Primeiro, resetar filtros para mostrar todos
@@ -2012,13 +2090,4 @@ function renderFilteredTreinos() {
         `;
         treinosList.appendChild(card);
     });
-}
-
-// Destacar termo de busca para treinos
-function highlightSearchTermTreinos(text) {
-    const searchTerm = document.getElementById('treinos-search')?.value;
-    if (!searchTerm || !text) return text;
-    
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
 }
