@@ -3,38 +3,18 @@ import { getDb } from '../config/db.js'
 
 export async function getPlanosAlunos(req, res, next) {
   try {
-    console.log('🔗 === DEBUG PLANO-ALUNOS ===');
-    console.log('🔗 req.user:', req.user);
-    console.log('🔗 req.user._id:', req.user._id);
-    console.log('🔗 req.user.role:', req.user.role);
-    console.log('🔗 typeof req.user._id:', typeof req.user._id);
+    console.log('🔗 Buscando planos-alunos para usuário:', req.user._id, 'Role:', req.user.role);
     
     const db = getDb()
-    
-    // PRIMEIRO: Testar se conseguimos buscar TODOS os dados (sem filtro)
-    console.log('🔍 Testando busca SEM filtro...');
-    const todosPlanosAlunos = await db.collection('planoalunos').find({}).toArray()
-    console.log('📊 TODOS os planos-alunos no banco:', todosPlanosAlunos.length);
-    console.log('📊 Primeiro documento completo:', JSON.stringify(todosPlanosAlunos[0], null, 2));
-    
-    // Verificar quais userIds existem no banco
-    const userIds = todosPlanosAlunos.map(doc => doc.userId);
-    console.log('🆔 UserIds encontrados no banco:', [...new Set(userIds)]);
-    console.log('🆔 UserId do usuário logado:', req.user._id.toString());
-    
     let query = {};
     
     // Se não for admin, filtrar apenas os planos-alunos do usuário logado
     if (req.user.role !== 'admin') {
       query.userId = req.user._id.toString();
-      console.log('🔍 Filtro aplicado (não-admin):', query);
-    } else {
-      console.log('👑 Usuário é admin - buscando todos os dados');
     }
     
     const planosAlunos = await db.collection('planoalunos').find(query).toArray()
-    console.log('📊 Planos-Alunos encontrados com filtro:', planosAlunos.length);
-    console.log('📊 Dados filtrados:', planosAlunos);
+    console.log('📊 Planos-Alunos encontrados:', planosAlunos.length);
     
     res.json(planosAlunos)
   } catch (err) {
