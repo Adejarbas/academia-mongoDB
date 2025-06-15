@@ -182,10 +182,10 @@ async function loadAllData() {
           // Popular selects para modais (caso já estejam abertos)
         try { populateSelectProfessores(); } catch (e) { console.error('Erro ao popular select professores:', e); }
         try { populateSelectAlunos(); } catch (e) { console.error('Erro ao popular select alunos:', e); }
-          // Configurar sistema de busca após carregar dados
+        
+        // Configurar sistema de busca após carregar dados
         try { setupAlunosSearch(); } catch (e) { console.error('Erro ao configurar busca de alunos:', e); }
         try { setupProfessoresSearch(); } catch (e) { console.error('Erro ao configurar busca de professores:', e); }
-        try { setupPlanosSearch(); } catch (e) { console.error('Erro ao configurar busca de planos:', e); }
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
         const isTokenError = error.message.includes('Token');
@@ -220,8 +220,6 @@ async function initializeApp() {
     }
 
     try {
-        console.log('Usuário logado, mostrando dashboard...');
-        showDashboard(); // MOSTRAR O DASHBOARD
         console.log('Iniciando carregamento dos dados...');
         await loadAllData();
         setupEventListeners();
@@ -271,15 +269,14 @@ function setupNavigation() {
             if (targetSection) {
                 targetSection.classList.add('active');
             }
-              // Reconfigurar sistemas de busca para a seção ativa
+            
+            // Reconfigurar sistemas de busca para a seção ativa
             if (sectionName === 'alunos') {
                 setTimeout(() => setupAlunosSearch(), 100);
             } else if (sectionName === 'professores') {
                 setTimeout(() => setupProfessoresSearch(), 100);
             } else if (sectionName === 'treinos') {
                 setTimeout(() => setupTreinosSearch(), 100);
-            } else if (sectionName === 'planos') {
-                setTimeout(() => setupPlanosSearch(), 100);
             }
             
             // Atualizar título da página
@@ -319,20 +316,6 @@ function setupMobileMenu() {
 
 // Render Functions
 function renderAlunos() {
-    console.log('Renderizando alunos...');
-    
-    // Inicializar filtros se necessário
-    if (filteredAlunos.length === 0 && data.alunos.length > 0) {
-        filteredAlunos = [...data.alunos];
-    }
-    
-    // Se temos filtros ativos, usar renderização filtrada
-    if (filteredAlunos.length > 0 || data.alunos.length === 0) {
-        renderFilteredAlunos();
-        return;
-    }
-    
-    // Renderização padrão (fallback)
     const alunosList = document.getElementById('alunos-list');
     if (!alunosList) return;
     
@@ -341,25 +324,31 @@ function renderAlunos() {
         return;
     }
     
-    filteredAlunos = [...data.alunos];
-    renderFilteredAlunos();
+    alunosList.innerHTML = '';
+    data.alunos.forEach(aluno => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+            <div class="item-info">
+                <h3>${aluno.nome || 'N/A'}</h3>
+                <p>${aluno.email || 'N/A'}</p>
+                <p>Telefone: ${aluno.telefone || 'N/A'} | Idade: ${aluno.idade || 'N/A'} anos</p>
+                <p>Nascimento: ${aluno.dataNascimento ? new Date(aluno.dataNascimento).toLocaleDateString('pt-BR') : 'N/A'} | Peso: ${aluno.peso || 'N/A'}kg</p>
+            </div>
+            <div class="item-actions">
+                <button class="btn btn-secondary btn-small" onclick="editAluno('${aluno._id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deleteAluno('${aluno._id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        alunosList.appendChild(card);
+    });
 }
 
 function renderProfessores() {
-    console.log('Renderizando professores...');
-    
-    // Inicializar filtros se necessário
-    if (filteredProfessores.length === 0 && data.professores.length > 0) {
-        filteredProfessores = [...data.professores];
-    }
-    
-    // Se temos filtros ativos, usar renderização filtrada
-    if (filteredProfessores.length > 0 || data.professores.length === 0) {
-        renderFilteredProfessores();
-        return;
-    }
-    
-    // Renderização padrão (fallback)
     const professoresList = document.getElementById('professores-list');
     if (!professoresList) return;
     
@@ -368,9 +357,22 @@ function renderProfessores() {
         return;
     }
     
-    filteredProfessores = [...data.professores];
-    renderFilteredProfessores();
-}
+    professoresList.innerHTML = '';
+    data.professores.forEach(professor => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `            <div class="item-info">
+                <h3>${professor.nome || 'N/A'}</h3>
+                <p>${professor.email || 'N/A'}</p>
+                <p>Especialidade: ${professor.especialidade || 'N/A'}</p>
+                <p>Telefone: ${professor.telefone || 'N/A'}</p>
+            </div>
+            <div class="item-actions">
+                <button class="btn btn-secondary btn-small" onclick="editProfessor('${professor._id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deleteProfessor('${professor._id}')">
+                    <i class="fas fa-trash"></i>
                 </button>
             </div>
         `;
@@ -378,10 +380,13 @@ function renderProfessores() {
     });
 }
 
-// Atualizar função renderTreinos original para usar os filtros
+// Função renderTreinos atualizada com filtros
 function renderTreinos() {
     const treinosList = document.getElementById('treinos-list');
     if (!treinosList) return;
+    
+    // Popular filtro de professores
+    populateProfessorFilter();
     
     if (!data.treinos || data.treinos.length === 0) {
         treinosList.innerHTML = '<div class="empty-state">Nenhum treino encontrado</div>';
@@ -389,8 +394,43 @@ function renderTreinos() {
     }
 
     // Inicializar com todos os treinos
-    filteredTreinos = [...data.treinos];
-    applyTreinosFilters();
+    filteredTreinos = data.treinos || [];
+    updateTreinosCount();
+    renderFilteredTreinos();
+}
+    
+    treinosList.innerHTML = '';
+    data.treinos.forEach(treino => {
+        // Encontrar nomes do professor e aluno
+        const professor = data.professores.find(p => p._id === treino.professor);
+        const aluno = data.alunos.find(a => a._id === treino.aluno);
+        
+        // Preparar lista de exercícios
+        const exerciciosText = treino.exercicios && treino.exercicios.length > 0 
+            ? `${treino.exercicios.length} exercício(s): ${treino.exercicios.slice(0, 3).join(', ')}${treino.exercicios.length > 3 ? '...' : ''}`
+            : 'Nenhum exercício adicionado';
+        
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+            <div class="item-info">
+                <h3>${treino.nome || 'N/A'}</h3>
+                <p><strong>Professor:</strong> ${professor ? professor.nome : 'Não informado'}</p>
+                <p><strong>Aluno:</strong> ${aluno ? aluno.nome : 'Não informado'}</p>
+                <p><strong>Exercícios:</strong> ${exerciciosText}</p>
+                <p><strong>Descrição:</strong> ${treino.descricao || 'N/A'}</p>
+            </div>
+            <div class="item-actions">
+                <button class="btn btn-secondary btn-small" onclick="editTreino('${treino._id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deleteTreino('${treino._id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        treinosList.appendChild(card);
+    });
 }
 
 function renderPlanos() {
@@ -401,8 +441,7 @@ function renderPlanos() {
         planosList.innerHTML = '<div class="empty-state">Nenhum plano encontrado</div>';
         return;
     }
-    
-    planosList.innerHTML = '';
+      planosList.innerHTML = '';
     data.planos.forEach(plano => {
         const card = document.createElement('div');
         card.className = 'plano-card';
@@ -458,7 +497,7 @@ function setupEventListeners() {
     setupAlunosSearch();
     setupProfessoresSearch();
     setupTreinosSearch();
-    setupPlanosSearch();
+    setupTreinosSearch();
     
     // Botões de logout
     const logoutButtons = document.querySelectorAll('#logout-btn, .logout-btn');
@@ -1030,14 +1069,7 @@ async function submitPlanoForm() {
     const form = document.getElementById('plano-form');
     const formData = new FormData(form);
     const editId = form.dataset.editId;
-    
-    // Validar formulário
-    const validationErrors = validatePlanoForm(formData);
-    if (showValidationErrors(validationErrors)) {
-        return;
-    }
-    
-    const planoData = {
+      const planoData = {
         nome: formData.get('nome'),
         descricao: formData.get('descricao'), 
         preco: parseFloat(formData.get('preco')) || 0,
@@ -1045,8 +1077,6 @@ async function submitPlanoForm() {
     };
 
     try {
-        logSystemEvent('plano_form_submit', { editId, nome: planoData.nome });
-        
         const url = editId ? `/api/planos/${editId}` : '/api/planos';
         const method = editId ? 'PUT' : 'POST';
         
@@ -1060,12 +1090,7 @@ async function submitPlanoForm() {
         });
 
         if (response.ok) {
-            const successMessage = editId ? 'Plano atualizado com sucesso!' : 'Plano cadastrado com sucesso!';
-            alert(successMessage);
-            
-            logSystemEvent('plano_save_success', { editId, nome: planoData.nome });
-            
-            closeModal('plano-modal');
+            alert(editId ? 'Plano atualizado com sucesso!' : 'Plano cadastrado com sucesso!');            closeModal('plano-modal');
             form.reset();
             delete form.dataset.editId;
             const titleElement = document.getElementById('plano-modal-title');
@@ -1075,15 +1100,11 @@ async function submitPlanoForm() {
             await loadAllData(); // Recarregar dados
         } else {
             const errorData = await response.json();
-            const errorMessage = errorData.message || errorData.errors?.[0]?.msg || 'Erro ao salvar plano';
-            
-            logSystemEvent('plano_save_error', { error: errorMessage, plano: planoData });
-            alert('Erro: ' + errorMessage);
+            alert('Erro: ' + (errorData.message || 'Erro ao salvar plano'));
         }
     } catch (error) {
         console.error('Erro ao salvar plano:', error);
-        logSystemEvent('plano_save_exception', { error: error.message, plano: planoData });
-        alert('Erro ao salvar plano: ' + error.message);
+        alert('Erro ao salvar plano');
     }
 }
 
@@ -1274,20 +1295,18 @@ function renderPlanosAlunos() {
     }
     
     try {
-        console.log('📊 Renderizando planos dos alunos:', data.planosAlunos);
-        
         if (!data.planosAlunos || data.planosAlunos.length === 0) {
             planosAlunosList.innerHTML = '<div class="empty-state">Nenhum plano atribuído ainda</div>';
             return;
-        }
-
-        planosAlunosList.innerHTML = '';
+        }        planosAlunosList.innerHTML = '';
         data.planosAlunos.forEach(planoAluno => {
             const card = document.createElement('div');
             card.className = 'plano-aluno-card';
             
             const dataInicio = planoAluno.dataInicio ? new Date(planoAluno.dataInicio).toLocaleDateString('pt-BR') : 'N/A';
-            const status = planoAluno.status || 'ATIVO';            card.innerHTML = `
+            const status = planoAluno.status || 'ATIVO';
+            
+            card.innerHTML = `
                 <div class="plano-aluno-info">
                     <h3>${planoAluno.alunoInfo?.nome || 'N/A'}</h3>
                     <p><strong>Plano:</strong> ${planoAluno.planoInfo?.nome || 'N/A'}</p>
@@ -1474,100 +1493,64 @@ let filteredAlunos = []; // Array para armazenar alunos filtrados
 
 // Configurar busca e filtros para alunos
 function setupAlunosSearch() {
-    console.log('Configurando busca e filtros para alunos...');
-    
     const searchInput = document.getElementById('alunos-search');
-    const toggleFiltersBtn = document.getElementById('toggle-filters-alunos');
+    const filterToggle = document.getElementById('alunos-filter-toggle');
     const filtersPanel = document.getElementById('alunos-filters');
-    const aplicarFiltrosBtn = document.getElementById('aplicar-filtros-alunos');
-    const limparFiltrosBtn = document.getElementById('limpar-filtros-alunos');
-    
-    if (!searchInput) {
-        console.warn('Campo de busca de alunos não encontrado');
-        return;
-    }
+    const clearFilters = document.getElementById('alunos-clear-filters');
+    const idadeMin = document.getElementById('idade-min');
+    const idadeMax = document.getElementById('idade-max');
+    const pesoMin = document.getElementById('peso-min');
+    const pesoMax = document.getElementById('peso-max');
+    const countSpan = document.getElementById('alunos-count');
+
+    if (!searchInput) return;
 
     // Toggle dos filtros avançados
-    if (toggleFiltersBtn && filtersPanel) {
-        toggleFiltersBtn.addEventListener('click', () => {
+    if (filterToggle && filtersPanel) {
+        filterToggle.addEventListener('click', () => {
             const isVisible = filtersPanel.style.display !== 'none';
             filtersPanel.style.display = isVisible ? 'none' : 'block';
-            toggleFiltersBtn.innerHTML = isVisible ? 
-                '<i class="fas fa-filter"></i> Mostrar Filtros' : 
-                '<i class="fas fa-filter"></i> Ocultar Filtros';
+            filterToggle.innerHTML = isVisible ? 
+                '<i class="fas fa-filter"></i> Filtros' : 
+                '<i class="fas fa-filter"></i> Ocultar';
         });
-        console.log('Toggle de filtros configurado');
-    }
-
-    // Aplicar filtros
-    if (aplicarFiltrosBtn) {
-        aplicarFiltrosBtn.addEventListener('click', applyAlunosFilters);
-        console.log('Botão aplicar filtros configurado');
     }
 
     // Limpar filtros
-    if (limparFiltrosBtn) {
-        limparFiltrosBtn.addEventListener('click', () => {
-            console.log('Limpando filtros...');
+    if (clearFilters) {
+        clearFilters.addEventListener('click', () => {
             searchInput.value = '';
-            
-            const inputs = [
-                'filtro-idade-min', 'filtro-idade-max',
-                'filtro-peso-min', 'filtro-peso-max',
-                'filtro-email', 'filtro-telefone'
-            ];
-            
-            inputs.forEach(id => {
-                const input = document.getElementById(id);
-                if (input) input.value = '';
-            });
-            
+            if (idadeMin) idadeMin.value = '';
+            if (idadeMax) idadeMax.value = '';
+            if (pesoMin) pesoMin.value = '';
+            if (pesoMax) pesoMax.value = '';
             applyAlunosFilters();
         });
-        console.log('Botão limpar filtros configurado');
     }
 
-    // Event listeners para busca em tempo real no campo principal
-    searchInput.addEventListener('input', debounce(applyAlunosFilters, 300));
-    
-    // Aplicar filtros iniciais
-    applyAlunosFilters();
-    console.log('Busca de alunos configurada com sucesso');
-}
-
-// Debounce function para otimizar performance
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+    // Event listeners para busca em tempo real
+    if (searchInput) {
+        searchInput.addEventListener('input', applyAlunosFilters);
+    }
+    if (idadeMin) idadeMin.addEventListener('input', applyAlunosFilters);
+    if (idadeMax) idadeMax.addEventListener('input', applyAlunosFilters);
+    if (pesoMin) pesoMin.addEventListener('input', applyAlunosFilters);
+    if (pesoMax) pesoMax.addEventListener('input', applyAlunosFilters);
 }
 
 // Aplicar filtros aos alunos
 function applyAlunosFilters() {
-    console.log('Aplicando filtros aos alunos...');
-    
     const searchTerm = document.getElementById('alunos-search')?.value.toLowerCase() || '';
-    const idadeMin = parseInt(document.getElementById('filtro-idade-min')?.value) || 0;
-    const idadeMax = parseInt(document.getElementById('filtro-idade-max')?.value) || 200;
-    const pesoMin = parseFloat(document.getElementById('filtro-peso-min')?.value) || 0;
-    const pesoMax = parseFloat(document.getElementById('filtro-peso-max')?.value) || 1000;
-    const emailFilter = document.getElementById('filtro-email')?.value.toLowerCase() || '';
-    const telefoneFilter = document.getElementById('filtro-telefone')?.value.toLowerCase() || '';
-
-    console.log('Filtros aplicados:', { searchTerm, idadeMin, idadeMax, pesoMin, pesoMax, emailFilter, telefoneFilter });
+    const idadeMin = parseInt(document.getElementById('idade-min')?.value) || 0;
+    const idadeMax = parseInt(document.getElementById('idade-max')?.value) || 999;
+    const pesoMin = parseFloat(document.getElementById('peso-min')?.value) || 0;
+    const pesoMax = parseFloat(document.getElementById('peso-max')?.value) || 9999;
 
     filteredAlunos = data.alunos.filter(aluno => {
-        // Busca por nome principal
+        // Busca por nome e email
         const matchesSearch = !searchTerm || 
             (aluno.nome && aluno.nome.toLowerCase().includes(searchTerm)) ||
-            (aluno.email && aluno.email.toLowerCase().includes(searchTerm)) ||
-            (aluno.telefone && aluno.telefone.toLowerCase().includes(searchTerm));
+            (aluno.email && aluno.email.toLowerCase().includes(searchTerm));
 
         // Calcular idade do aluno
         let idade = 0;
@@ -1581,20 +1564,22 @@ function applyAlunosFilters() {
             }
         }
 
-        // Filtros avançados
+        // Filtro por idade
         const matchesIdade = idade >= idadeMin && idade <= idadeMax;
+
+        // Filtro por peso
         const peso = parseFloat(aluno.peso) || 0;
         const matchesPeso = peso >= pesoMin && peso <= pesoMax;
-        const matchesEmail = !emailFilter || 
-            (aluno.email && aluno.email.toLowerCase().includes(emailFilter));
-        const matchesTelefone = !telefoneFilter || 
-            (aluno.telefone && aluno.telefone.toLowerCase().includes(telefoneFilter));
 
-        return matchesSearch && matchesIdade && matchesPeso && matchesEmail && matchesTelefone;
+        return matchesSearch && matchesIdade && matchesPeso;
     });
 
-    console.log(`${filteredAlunos.length} alunos encontrados após filtros`);
-    
+    // Atualizar contador
+    const countSpan = document.getElementById('alunos-count');
+    if (countSpan) {
+        countSpan.textContent = `${filteredAlunos.length} aluno${filteredAlunos.length !== 1 ? 's' : ''} encontrado${filteredAlunos.length !== 1 ? 's' : ''}`;
+    }
+
     // Renderizar alunos filtrados
     renderFilteredAlunos();
 }
@@ -1619,47 +1604,16 @@ function renderFilteredAlunos() {
         if (aluno.dataNascimento) {
             const nascimento = new Date(aluno.dataNascimento);
             const hoje = new Date();
-            let idadeNum = hoje.getFullYear() - nascimento.getFullYear();
+            idade = hoje.getFullYear() - nascimento.getFullYear();
             const mes = hoje.getMonth() - nascimento.getMonth();
             if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-                idadeNum--;
+                idade--;
             }
-            idade = idadeNum + ' anos';
+            idade = idade + ' anos';
         }
         
         card.innerHTML = `
             <div class="item-info">
-                <h3>${aluno.nome || 'N/A'}</h3>
-                <p><i class="fas fa-envelope"></i> ${aluno.email || 'N/A'}</p>
-                <p><i class="fas fa-phone"></i> ${aluno.telefone || 'N/A'}</p>
-                <p><i class="fas fa-birthday-cake"></i> ${idade}</p>
-                <p><i class="fas fa-weight"></i> ${aluno.peso || 'N/A'}kg</p>
-                <p><i class="fas fa-calendar"></i> ${aluno.dataNascimento ? new Date(aluno.dataNascimento).toLocaleDateString('pt-BR') : 'N/A'}</p>
-            </div>
-            <div class="item-actions">
-                <button class="btn btn-secondary btn-small" onclick="editAluno('${aluno._id}')" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-small" onclick="deleteAluno('${aluno._id}')" title="Excluir">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        alunosList.appendChild(card);
-    });
-    
-    // Atualizar título da seção com contador
-    const sectionHeader = document.querySelector('#alunos-section .section-header h2');
-    if (sectionHeader) {
-        const total = data.alunos.length;
-        const filtered = filteredAlunos.length;
-        if (total === filtered) {
-            sectionHeader.textContent = `Gerenciar Alunos (${total})`;
-        } else {
-            sectionHeader.textContent = `Gerenciar Alunos (${filtered}/${total})`;
-        }
-    }
-}
                 <h3>${highlightSearchTerm(aluno.nome || 'N/A')}</h3>
                 <p>${highlightSearchTerm(aluno.email || 'N/A')}</p>
                 <p>Telefone: ${aluno.telefone || 'N/A'} | Idade: ${idade}</p>
@@ -1701,156 +1655,56 @@ function renderAlunos() {
 
 let filteredProfessores = []; // Array para armazenar professores filtrados
 
-// ==================== SISTEMA DE BUSCA E FILTROS - PROFESSORES ====================
-
-let filteredProfessores = []; // Array para armazenar professores filtrados
-
 // Configurar busca e filtros para professores
 function setupProfessoresSearch() {
-    console.log('Configurando busca e filtros para professores...');
+    console.log('🔍 Configurando busca de professores...');
     
     const searchInput = document.getElementById('professores-search');
-    const toggleFiltersBtn = document.getElementById('toggle-filters-professores');
+    const filterToggle = document.getElementById('professores-filter-toggle');
     const filtersPanel = document.getElementById('professores-filters');
-    const aplicarFiltrosBtn = document.getElementById('aplicar-filtros-professores');
-    const limparFiltrosBtn = document.getElementById('limpar-filtros-professores');
-    
+    const clearFilters = document.getElementById('professores-clear-filters');
+    const especialidadeFilter = document.getElementById('especialidade-filter');
+    const countSpan = document.getElementById('professores-count');
+
+    console.log('Elementos encontrados:', {
+        searchInput: !!searchInput,
+        filterToggle: !!filterToggle,
+        filtersPanel: !!filtersPanel,
+        clearFilters: !!clearFilters,
+        especialidadeFilter: !!especialidadeFilter,
+        countSpan: !!countSpan
+    });
+
     if (!searchInput) {
-        console.warn('Campo de busca de professores não encontrado');
+        console.log('❌ Campo de busca de professores não encontrado');
         return;
     }
 
     // Toggle dos filtros avançados
-    if (toggleFiltersBtn && filtersPanel) {
-        toggleFiltersBtn.addEventListener('click', () => {
+    if (filterToggle && filtersPanel) {
+        console.log('✅ Configurando toggle de filtros');
+        filterToggle.addEventListener('click', () => {
+            console.log('🔥 Toggle clicado!');
             const isVisible = filtersPanel.style.display !== 'none';
             filtersPanel.style.display = isVisible ? 'none' : 'block';
-            toggleFiltersBtn.innerHTML = isVisible ? 
-                '<i class="fas fa-filter"></i> Mostrar Filtros' : 
-                '<i class="fas fa-filter"></i> Ocultar Filtros';
+            filterToggle.innerHTML = isVisible ? 
+                '<i class="fas fa-filter"></i> Filtros' : 
+                '<i class="fas fa-filter"></i> Ocultar';
+            console.log('Panel agora está:', filtersPanel.style.display);
         });
-        console.log('Toggle de filtros configurado');
-    }
-
-    // Aplicar filtros
-    if (aplicarFiltrosBtn) {
-        aplicarFiltrosBtn.addEventListener('click', applyProfessoresFilters);
-        console.log('Botão aplicar filtros configurado');
+    } else {
+        console.log('❌ Elementos de toggle não encontrados:', {
+            filterToggle: !!filterToggle,
+            filtersPanel: !!filtersPanel
+        });
     }
 
     // Limpar filtros
-    if (limparFiltrosBtn) {
-        limparFiltrosBtn.addEventListener('click', () => {
-            console.log('Limpando filtros de professores...');
+    if (clearFilters) {
+        clearFilters.addEventListener('click', () => {
             searchInput.value = '';
-            
-            const inputs = [
-                'filtro-prof-especialidade', 'filtro-prof-email',
-                'filtro-prof-telefone', 'filtro-prof-nome'
-            ];
-            
-            inputs.forEach(id => {
-                const input = document.getElementById(id);
-                if (input) input.value = '';
-            });
-            
+            if (especialidadeFilter) especialidadeFilter.value = '';
             applyProfessoresFilters();
-        });
-        console.log('Botão limpar filtros configurado');
-    }
-
-    // Event listeners para busca em tempo real no campo principal
-    searchInput.addEventListener('input', debounce(applyProfessoresFilters, 300));
-    
-    // Aplicar filtros iniciais
-    applyProfessoresFilters();
-    console.log('Busca de professores configurada com sucesso');
-}
-
-// Aplicar filtros aos professores
-function applyProfessoresFilters() {
-    console.log('Aplicando filtros aos professores...');
-    
-    const searchTerm = document.getElementById('professores-search')?.value.toLowerCase() || '';
-    const especialidadeFilter = document.getElementById('filtro-prof-especialidade')?.value.toLowerCase() || '';
-    const emailFilter = document.getElementById('filtro-prof-email')?.value.toLowerCase() || '';
-    const telefoneFilter = document.getElementById('filtro-prof-telefone')?.value.toLowerCase() || '';
-    const nomeFilter = document.getElementById('filtro-prof-nome')?.value.toLowerCase() || '';
-
-    console.log('Filtros aplicados:', { searchTerm, especialidadeFilter, emailFilter, telefoneFilter, nomeFilter });
-
-    filteredProfessores = data.professores.filter(professor => {
-        // Busca principal
-        const matchesSearch = !searchTerm || 
-            (professor.nome && professor.nome.toLowerCase().includes(searchTerm)) ||
-            (professor.email && professor.email.toLowerCase().includes(searchTerm)) ||
-            (professor.especialidade && professor.especialidade.toLowerCase().includes(searchTerm));
-
-        // Filtros avançados
-        const matchesEspecialidade = !especialidadeFilter || 
-            (professor.especialidade && professor.especialidade.toLowerCase().includes(especialidadeFilter));
-        const matchesEmail = !emailFilter || 
-            (professor.email && professor.email.toLowerCase().includes(emailFilter));
-        const matchesTelefone = !telefoneFilter || 
-            (professor.telefone && professor.telefone.toLowerCase().includes(telefoneFilter));
-        const matchesNome = !nomeFilter || 
-            (professor.nome && professor.nome.toLowerCase().includes(nomeFilter));
-
-        return matchesSearch && matchesEspecialidade && matchesEmail && matchesTelefone && matchesNome;
-    });
-
-    console.log(`${filteredProfessores.length} professores encontrados após filtros`);
-    
-    // Renderizar professores filtrados
-    renderFilteredProfessores();
-}
-
-// Renderizar professores filtrados
-function renderFilteredProfessores() {
-    const professoresList = document.getElementById('professores-list');
-    if (!professoresList) return;
-    
-    if (filteredProfessores.length === 0) {
-        professoresList.innerHTML = '<div class="empty-state">Nenhum professor encontrado com os filtros aplicados</div>';
-        return;
-    }
-    
-    professoresList.innerHTML = '';
-    filteredProfessores.forEach(professor => {
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        
-        card.innerHTML = `
-            <div class="item-info">
-                <h3>${professor.nome || 'N/A'}</h3>
-                <p><i class="fas fa-envelope"></i> ${professor.email || 'N/A'}</p>
-                <p><i class="fas fa-graduation-cap"></i> ${professor.especialidade || 'N/A'}</p>
-                <p><i class="fas fa-phone"></i> ${professor.telefone || 'N/A'}</p>
-            </div>
-            <div class="item-actions">
-                <button class="btn btn-secondary btn-small" onclick="editProfessor('${professor._id}')" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-small" onclick="deleteProfessor('${professor._id}')" title="Excluir">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        professoresList.appendChild(card);
-    });
-    
-    // Atualizar título da seção com contador
-    const sectionHeader = document.querySelector('#professores-section .section-header h2');
-    if (sectionHeader) {
-        const total = data.professores.length;
-        const filtered = filteredProfessores.length;
-        if (total === filtered) {
-            sectionHeader.textContent = `Gerenciar Professores (${total})`;
-        } else {
-            sectionHeader.textContent = `Gerenciar Professores (${filtered}/${total})`;
-        }
-    }
-}
         });
     }
 
@@ -1973,42 +1827,152 @@ function renderProfessores() {
 // ===== SISTEMA DE BUSCA E FILTROS - TREINOS =====
 let filteredTreinos = [];
 
-// Configurar sistema de busca simples para treinos
+// Configurar sistema de busca para treinos
 function setupTreinosSearch() {
-    const searchInput = document.getElementById('treinos-search');
+    console.log('🔍 Configurando busca de treinos...');
     
+    const searchInput = document.getElementById('treinos-search');
+    const filterToggle = document.getElementById('treinos-filter-toggle');
+    const filtersPanel = document.getElementById('treinos-filters');
+    const clearFilters = document.getElementById('treinos-clear-filters');
+    const exerciciosMin = document.getElementById('exercicios-min');
+    const exerciciosMax = document.getElementById('exercicios-max');
+    const professorFilter = document.getElementById('professor-filter');
+    const countSpan = document.getElementById('treinos-count');
+
+    console.log('Elementos encontrados:', {
+        searchInput: !!searchInput,
+        filterToggle: !!filterToggle,
+        filtersPanel: !!filtersPanel,
+        clearFilters: !!clearFilters,
+        exerciciosMin: !!exerciciosMin,
+        exerciciosMax: !!exerciciosMax,
+        professorFilter: !!professorFilter,
+        countSpan: !!countSpan
+    });
+
     if (!searchInput) {
+        console.log('❌ Campo de busca de treinos não encontrado');
         return;
     }
 
-    // Event listener para busca em tempo real
-    searchInput.addEventListener('input', applyTreinosFilters);
+    // Toggle dos filtros avançados
+    if (filterToggle && filtersPanel) {
+        console.log('✅ Configurando toggle de filtros de treinos');
+        filterToggle.addEventListener('click', () => {
+            console.log('🔥 Toggle de treinos clicado!');
+            const isVisible = filtersPanel.style.display !== 'none';
+            filtersPanel.style.display = isVisible ? 'none' : 'block';
+            filterToggle.innerHTML = isVisible ? 
+                '<i class="fas fa-filter"></i> Filtros' : 
+                '<i class="fas fa-filter"></i> Ocultar';
+            console.log('Panel de treinos agora está:', filtersPanel.style.display);
+        });
+    } else {
+        console.log('❌ Elementos de toggle de treinos não encontrados:', {
+            filterToggle: !!filterToggle,
+            filtersPanel: !!filtersPanel
+        });
+    }
+
+    // Limpar filtros
+    if (clearFilters) {
+        clearFilters.addEventListener('click', () => {
+            searchInput.value = '';
+            if (exerciciosMin) exerciciosMin.value = '';
+            if (exerciciosMax) exerciciosMax.value = '';
+            if (professorFilter) professorFilter.value = '';
+            applyTreinosFilters();
+        });
+    }
+
+    // Event listeners para busca em tempo real
+    if (searchInput) {
+        searchInput.addEventListener('input', applyTreinosFilters);
+    }
+    if (exerciciosMin) {
+        exerciciosMin.addEventListener('input', applyTreinosFilters);
+    }
+    if (exerciciosMax) {
+        exerciciosMax.addEventListener('input', applyTreinosFilters);
+    }
+    if (professorFilter) {
+        professorFilter.addEventListener('change', applyTreinosFilters);
+    }
 }
 
+// Popular dropdown de professores para filtro
+function populateProfessorFilter() {
+    const professorFilter = document.getElementById('professor-filter');
+    if (!professorFilter || !data.professores) return;
+
+    // Extrair professores únicos
+    const professores = data.professores.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
+    // Limpar e popular o select
+    professorFilter.innerHTML = '<option value="">Todos os professores</option>';
+    professores.forEach(professor => {
+        const option = document.createElement('option');
+        option.value = professor._id;
+        option.textContent = professor.nome || 'Professor sem nome';
+        professorFilter.appendChild(option);
+    });
+}
 
 // Aplicar filtros de treinos
-// Aplicar busca simples de treinos por nome
 function applyTreinosFilters() {
     if (!data.treinos) {
         filteredTreinos = [];
+        updateTreinosCount();
         renderFilteredTreinos();
         return;
     }
 
     const searchTerm = document.getElementById('treinos-search')?.value.toLowerCase() || '';
+    const exerciciosMin = parseInt(document.getElementById('exercicios-min')?.value) || 0;
+    const exerciciosMax = parseInt(document.getElementById('exercicios-max')?.value) || Infinity;
+    const professorId = document.getElementById('professor-filter')?.value || '';
+
+    console.log('🔍 Aplicando filtros de treinos:', { searchTerm, exerciciosMin, exerciciosMax, professorId });
 
     filteredTreinos = data.treinos.filter(treino => {
-        // Busca apenas por nome do treino
-        const matchesSearch = !searchTerm || 
-            (treino.nome && treino.nome.toLowerCase().includes(searchTerm));
+        // Busca por texto (nome do aluno, professor ou nome do treino)
+        let matchesSearch = true;
+        if (searchTerm) {
+            const alunoNome = getAlunoName(treino.alunoId) || '';
+            const professorNome = getProfessorName(treino.professorId) || '';
+            const treinoNome = treino.nome || '';
+            
+            matchesSearch = 
+                alunoNome.toLowerCase().includes(searchTerm) ||
+                professorNome.toLowerCase().includes(searchTerm) ||
+                treinoNome.toLowerCase().includes(searchTerm);
+        }
 
-        return matchesSearch;
+        // Filtro por número de exercícios
+        const numExercicios = treino.exercicios ? treino.exercicios.length : 0;
+        const matchesExercicios = numExercicios >= exerciciosMin && numExercicios <= exerciciosMax;
+
+        // Filtro por professor
+        const matchesProfessor = !professorId || treino.professorId === professorId;
+
+        return matchesSearch && matchesExercicios && matchesProfessor;
     });
 
+    console.log(`📊 Treinos filtrados: ${filteredTreinos.length} de ${data.treinos.length}`);
+    
+    updateTreinosCount();
     renderFilteredTreinos();
 }
 
-
+// Atualizar contador de treinos
+function updateTreinosCount() {
+    const countSpan = document.getElementById('treinos-count');
+    if (countSpan) {
+        const total = filteredTreinos.length;
+        countSpan.textContent = `${total} treino${total !== 1 ? 's' : ''} encontrado${total !== 1 ? 's' : ''}`;
+    }
+}
 
 // Renderizar treinos filtrados
 function renderFilteredTreinos() {
@@ -2020,26 +1984,22 @@ function renderFilteredTreinos() {
         return;
     }
     
-    treinosList.innerHTML = '';    filteredTreinos.forEach(treino => {
-        // Encontrar nomes do professor e aluno (como na versão original)
-        const professor = data.professores.find(p => p._id === treino.professor);
-        const aluno = data.alunos.find(a => a._id === treino.aluno);
-        
-        // Preparar lista de exercícios (como na versão original)
-        const exerciciosText = treino.exercicios && treino.exercicios.length > 0 
-            ? `${treino.exercicios.length} exercício(s): ${treino.exercicios.slice(0, 3).join(', ')}${treino.exercicios.length > 3 ? '...' : ''}`
-            : 'Nenhum exercício adicionado';
-        
+    treinosList.innerHTML = '';
+    filteredTreinos.forEach(treino => {
         const card = document.createElement('div');
         card.className = 'item-card';
         
+        const alunoNome = getAlunoName(treino.alunoId) || 'Aluno não encontrado';
+        const professorNome = getProfessorName(treino.professorId) || 'Professor não encontrado';
+        const numExercicios = treino.exercicios ? treino.exercicios.length : 0;
+        
         card.innerHTML = `
             <div class="item-info">
-                <h3>${highlightSearchTermTreinos(treino.nome || 'N/A')}</h3>
-                <p><strong>Professor:</strong> ${professor ? professor.nome : 'Não informado'}</p>
-                <p><strong>Aluno:</strong> ${aluno ? aluno.nome : 'Não informado'}</p>
-                <p><strong>Exercícios:</strong> ${exerciciosText}</p>
-                <p><strong>Descrição:</strong> ${treino.descricao || 'N/A'}</p>
+                <h3>${highlightSearchTermTreinos(treino.nome || 'Treino sem nome')}</h3>
+                <p><strong>Aluno:</strong> ${highlightSearchTermTreinos(alunoNome)}</p>
+                <p><strong>Professor:</strong> ${highlightSearchTermTreinos(professorNome)}</p>
+                <p><strong>Exercícios:</strong> <span class="badge badge-info">${numExercicios}</span></p>
+                <p><strong>Data:</strong> ${treino.data ? new Date(treino.data).toLocaleDateString('pt-BR') : 'N/A'}</p>
             </div>
             <div class="item-actions">
                 <button class="btn btn-secondary btn-small" onclick="editTreino('${treino._id}')">
@@ -2062,393 +2022,3 @@ function highlightSearchTermTreinos(text) {
     const regex = new RegExp(`(${searchTerm})`, 'gi');
     return text.replace(regex, '<mark>$1</mark>');
 }
-
-// ===== FUNÇÕES AUXILIARES PARA TREINOS =====
-
-// Buscar nome do aluno por ID
-function getAlunoName(alunoId) {
-    if (!alunoId || !data.alunos) return null;
-    const aluno = data.alunos.find(a => a._id === alunoId);
-    return aluno ? aluno.nome : null;
-}
-
-// Buscar nome do professor por ID
-function getProfessorName(professorId) {
-    if (!professorId || !data.professores) return null;
-    const professor = data.professores.find(p => p._id === professorId);
-    return professor ? professor.nome : null;
-}
-
-// ===== SISTEMA DE BUSCA E FILTROS PARA PLANOS DOS ALUNOS =====
-
-let filteredPlanosAlunos = [];
-
-// Configurar sistema de busca e filtros para planos dos alunos
-function setupPlanosSearch() {    const searchInput = document.getElementById('planos-search');
-    const filterBtn = document.getElementById('planos-filter-toggle');
-    const filtersPanel = document.getElementById('planos-filters');
-    const clearBtn = document.getElementById('planos-clear-filters');
-    
-    if (!searchInput) {
-        return;
-    }
-
-    // Event listeners para busca em tempo real
-    searchInput.addEventListener('input', applyPlanosFilters);
-    
-    // Event listener para botão de filtros (igual aos outros)
-    if (filterBtn && filtersPanel) {
-        filterBtn.addEventListener('click', () => {
-            if (filtersPanel.style.display === 'none' || filtersPanel.style.display === '') {
-                filtersPanel.style.display = 'block';
-            } else {
-                filtersPanel.style.display = 'none';
-            }
-        });
-    }
-    
-    // Event listeners para filtros avançados
-    const filterInputs = ['preco-min', 'preco-max', 'duracao-min', 'duracao-max', 'status-filter'];
-    filterInputs.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('input', applyPlanosFilters);
-            input.addEventListener('change', applyPlanosFilters);
-        }
-    });
-    
-    // Event listener para limpar filtros
-    if (clearBtn) {
-        clearBtn.addEventListener('click', clearPlanosFilters);
-    }
-    
-    // Aplicar filtros inicial
-    applyPlanosFilters();
-}
-
-// Aplicar filtros de planos dos alunos
-function applyPlanosFilters() {
-    if (!data.planosAlunos) {
-        filteredPlanosAlunos = [];
-        renderFilteredPlanosAlunos();
-        updatePlanosResultsCount();
-        return;
-    }
-
-    const searchTerm = document.getElementById('planos-search')?.value.toLowerCase() || '';
-    const precoMin = parseFloat(document.getElementById('preco-min')?.value) || 0;
-    const precoMax = parseFloat(document.getElementById('preco-max')?.value) || Infinity;
-    const duracaoMin = parseInt(document.getElementById('duracao-min')?.value) || 0;
-    const duracaoMax = parseInt(document.getElementById('duracao-max')?.value) || Infinity;
-    const statusFilter = document.getElementById('status-filter')?.value || '';
-
-    filteredPlanosAlunos = data.planosAlunos.filter(planoAluno => {
-        // Busca por nome do aluno ou nome do plano
-        const nomeAluno = planoAluno.alunoInfo?.nome?.toLowerCase() || '';
-        const nomePlano = planoAluno.planoInfo?.nome?.toLowerCase() || '';
-        const matchesSearch = !searchTerm || 
-            nomeAluno.includes(searchTerm) || 
-            nomePlano.includes(searchTerm);
-
-        // Filtro por preço
-        const planoPreco = parseFloat(planoAluno.planoInfo?.preco) || 0;
-        const matchesPreco = planoPreco >= precoMin && planoPreco <= precoMax;
-        
-        // Filtro por duração
-        const planoDuracao = parseInt(planoAluno.planoInfo?.duracaoMeses) || 0;
-        const matchesDuracao = planoDuracao >= duracaoMin && planoDuracao <= duracaoMax;
-
-        // Filtro por status
-        const planoStatus = planoAluno.status || 'ATIVO';
-        const matchesStatus = !statusFilter || planoStatus === statusFilter;
-
-        return matchesSearch && matchesPreco && matchesDuracao && matchesStatus;
-    });
-
-    renderFilteredPlanosAlunos();
-    updatePlanosResultsCount();
-}
-
-// Renderizar planos dos alunos filtrados
-function renderFilteredPlanosAlunos() {
-    const planosAlunosList = document.getElementById('planos-alunos-list');
-    if (!planosAlunosList) return;
-    
-    if (filteredPlanosAlunos.length === 0) {
-        planosAlunosList.innerHTML = '<div class="empty-state">Nenhum plano encontrado com os filtros aplicados</div>';
-        return;
-    }
-    
-    planosAlunosList.innerHTML = '';
-    filteredPlanosAlunos.forEach(planoAluno => {
-        const card = document.createElement('div');
-        card.className = 'plano-aluno-card';
-        
-        const dataInicio = planoAluno.dataInicio ? new Date(planoAluno.dataInicio).toLocaleDateString('pt-BR') : 'N/A';
-        const status = planoAluno.status || 'ATIVO';
-        
-        card.innerHTML = `
-            <div class="plano-aluno-info">
-                <h3>${highlightSearchTermPlanos(planoAluno.alunoInfo?.nome || 'N/A')}</h3>
-                <p><strong>Plano:</strong> ${highlightSearchTermPlanos(planoAluno.planoInfo?.nome || 'N/A')}</p>
-                <p><strong>Preço:</strong> R$ ${planoAluno.planoInfo?.preco || '0,00'}</p>
-                <p><strong>Duração:</strong> ${planoAluno.planoInfo?.duracaoMeses || 'N/A'} meses</p>
-                <p><strong>Início:</strong> ${dataInicio}</p>
-                <span class="status-badge status-${status.toLowerCase()}">${status}</span>
-            </div>
-            <div class="plano-aluno-actions">
-                <button class="btn btn-secondary btn-sm" onclick="editPlanoAluno('${planoAluno._id}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="deletePlanoAluno('${planoAluno._id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        planosAlunosList.appendChild(card);
-    });
-}
-
-// Atualizar contador de resultados de planos dos alunos
-function updatePlanosResultsCount() {
-    const resultsCount = document.getElementById('planos-results-count');
-    if (resultsCount) {
-        const count = filteredPlanosAlunos.length;
-        resultsCount.textContent = `${count} resultado${count !== 1 ? 's' : ''}`;
-    }
-}
-
-// Limpar filtros de planos dos alunos
-function clearPlanosFilters() {
-    // Limpar campos de busca e filtros
-    document.getElementById('planos-search').value = '';
-    document.getElementById('preco-min').value = '';
-    document.getElementById('preco-max').value = '';
-    document.getElementById('duracao-min').value = '';
-    document.getElementById('duracao-max').value = '';
-    document.getElementById('status-filter').value = '';
-    
-    // Reaplicar filtros (que agora estarão limpos)
-    applyPlanosFilters();
-}
-
-// Destacar termo de busca para planos dos alunos
-function highlightSearchTermPlanos(text) {
-    const searchTerm = document.getElementById('planos-search')?.value;
-    if (!searchTerm || !text) return text;
-    
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
-}
-
-// ===== FUNÇÕES DE VALIDAÇÃO FRONTEND =====
-
-// Validar email
-function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Validar telefone (10 ou 11 dígitos)
-function validatePhone(phone) {
-    const phoneRegex = /^\d{10,11}$/;
-    return phoneRegex.test(phone.replace(/\D/g, ''));
-}
-
-// Validar CPF (básico)
-function validateCPF(cpf) {
-    const cpfRegex = /^\d{11}$/;
-    return cpfRegex.test(cpf.replace(/\D/g, ''));
-}
-
-// Validar preço
-function validatePrice(price) {
-    return !isNaN(price) && parseFloat(price) >= 0;
-}
-
-// Validar campos obrigatórios
-function validateRequiredFields(formData, requiredFields) {
-    const errors = [];
-    
-    requiredFields.forEach(field => {
-        if (!formData.get(field) || formData.get(field).trim() === '') {
-            errors.push(`O campo ${field} é obrigatório`);
-        }
-    });
-    
-    return errors;
-}
-
-// Mostrar erros de validação
-function showValidationErrors(errors) {
-    if (errors.length === 0) return false;
-    
-    const errorMessage = errors.join('\n');
-    alert('Erros de validação:\n\n' + errorMessage);
-    return true;
-}
-
-// Validar formulário de aluno
-function validateAlunoForm(formData) {
-    const errors = [];
-    
-    // Campos obrigatórios
-    const requiredFields = ['nome', 'email', 'telefone', 'dataNascimento', 'peso'];
-    errors.push(...validateRequiredFields(formData, requiredFields));
-    
-    // Validar email
-    const email = formData.get('email');
-    if (email && !validateEmail(email)) {
-        errors.push('Email inválido');
-    }
-    
-    // Validar telefone
-    const telefone = formData.get('telefone');
-    if (telefone && !validatePhone(telefone)) {
-        errors.push('Telefone deve ter 10 ou 11 dígitos');
-    }
-    
-    // Validar peso
-    const peso = formData.get('peso');
-    if (peso && !validatePrice(peso)) {
-        errors.push('Peso deve ser um número positivo');
-    }
-    
-    return errors;
-}
-
-// Validar formulário de plano
-function validatePlanoForm(formData) {
-    const errors = [];
-    
-    // Campos obrigatórios
-    const requiredFields = ['nome', 'preco', 'duracaoMeses'];
-    errors.push(...validateRequiredFields(formData, requiredFields));
-    
-    // Validar preço
-    const preco = formData.get('preco');
-    if (preco && !validatePrice(preco)) {
-        errors.push('Preço deve ser um número positivo');
-    }
-    
-    // Validar duração
-    const duracao = formData.get('duracaoMeses');
-    if (duracao && (isNaN(duracao) || parseInt(duracao) <= 0)) {
-        errors.push('Duração deve ser um número positivo');
-    }
-    
-    return errors;
-}
-
-// Formatar moeda brasileira
-function formatCurrency(value) {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(value);
-}
-
-// Formatar data brasileira
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-}
-
-// Formatar telefone brasileiro
-function formatPhone(phone) {
-    if (!phone) return '';
-    const cleaned = phone.replace(/\D/g, '');
-    
-    if (cleaned.length === 11) {
-        return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    } else if (cleaned.length === 10) {
-        return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-    }
-    
-    return phone;
-}
-
-// Debounce para busca
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// ===== UTILITÁRIOS DE SISTEMA =====
-
-// Verificar se o sistema está funcionando
-async function checkSystemHealth() {
-    try {
-        const response = await fetch('/api/status/health');
-        const data = await response.json();
-        
-        if (data.status === 'OK') {
-            console.log('✅ Sistema funcionando normalmente');
-            return true;
-        } else {
-            console.error('❌ Sistema com problemas:', data);
-            return false;
-        }
-    } catch (error) {
-        console.error('❌ Erro ao verificar sistema:', error);
-        return false;
-    }
-}
-
-// Verificar conectividade
-function checkConnectivity() {
-    return navigator.onLine;
-}
-
-// Logs do sistema
-function logSystemEvent(event, details = null) {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-        timestamp,
-        event,
-        details,
-        user: localStorage.getItem('userName') || 'unknown'
-    };
-    
-    console.log('📊 SYSTEM LOG:', logEntry);
-    
-    // Salvar logs localmente para debug
-    const logs = JSON.parse(localStorage.getItem('systemLogs') || '[]');
-    logs.push(logEntry);
-    
-    // Manter apenas os últimos 100 logs
-    if (logs.length > 100) {
-        logs.splice(0, logs.length - 100);
-    }
-    
-    localStorage.setItem('systemLogs', JSON.stringify(logs));
-}
-
-// Verificar sistema ao carregar
-document.addEventListener('DOMContentLoaded', () => {
-    checkSystemHealth();
-    logSystemEvent('system_loaded');
-});
-
-// Verificar conectividade
-window.addEventListener('online', () => {
-    logSystemEvent('connectivity_restored');
-    console.log('🌐 Conectividade restaurada');
-});
-
-window.addEventListener('offline', () => {
-    logSystemEvent('connectivity_lost');
-    console.log('🚫 Conectividade perdida');
-});
-
-console.log('🚀 Sistema Multi-Tenant Academia carregado com sucesso!');
-console.log('📊 Logs disponíveis em localStorage.getItem("systemLogs")');
-console.log('🧪 Página de teste: /test.html');
