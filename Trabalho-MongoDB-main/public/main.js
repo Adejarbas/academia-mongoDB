@@ -343,9 +343,8 @@ function setupNavigation() {
             if (sectionName === 'alunos') {
                 setTimeout(() => setupAlunosSearch(), 100);
             } else if (sectionName === 'professores') {
-                setTimeout(() => setupProfessoresSearch(), 100);
-            } else if (sectionName === 'treinos') {
-                setTimeout(() => setupTreinosSearch(), 100);
+                setTimeout(() => setupProfessoresSearch(), 100);            } else if (sectionName === 'treinos') {
+                setTimeout(() => setupTreinosSearch(), 1000); // Aumentado para 1 segundo
             }
             
             // Atualizar título da página
@@ -483,9 +482,6 @@ function renderTreinos() {
     const treinosList = document.getElementById('treinos-list');
     if (!treinosList) return;
     
-    // Popular filtro de professores
-    populateProfessorFilter();
-    
     if (!data.treinos || data.treinos.length === 0) {
         treinosList.innerHTML = '<div class="empty-state">Nenhum treino encontrado</div>';
         return;
@@ -596,9 +592,10 @@ function setupEventListeners() {
     showDashboard();
     
     // Configurar navegação
-    setupNavigation();
-      // Configurar menu mobile
-    setupMobileMenu();    // Configurar sistema de busca
+    setupNavigation();    // Configurar menu mobile
+    setupMobileMenu();
+    
+    // Configurar sistema de busca
     setupAlunosSearch();
     setupProfessoresSearch();
     setupTreinosSearch();
@@ -1982,94 +1979,108 @@ function refreshProfessoresDisplay() {
 
 // Configurar sistema de busca para treinos
 function setupTreinosSearch() {
-    console.log('🔍 Configurando busca de treinos...');
+    console.log('🔍 INICIANDO CONFIGURAÇÃO DE BUSCA DE TREINOS...');
+    
+    // Verificar se os elementos críticos existem antes de continuar
+    const requiredElements = [
+        'treinos-search',
+        'toggle-filters-treinos', 
+        'treinos-filters'
+    ];
+    
+    const missingElements = requiredElements.filter(id => !document.getElementById(id));
+    if (missingElements.length > 0) {
+        console.log('❌ Elementos não encontrados, tentando novamente em 500ms:', missingElements);
+        setTimeout(() => setupTreinosSearch(), 500);
+        return;
+    }
     
     const searchInput = document.getElementById('treinos-search');
-    const filterToggle = document.getElementById('treinos-filter-toggle');
+    const filterToggle = document.getElementById('toggle-filters-treinos'); // ID correto
     const filtersPanel = document.getElementById('treinos-filters');
-    const clearFilters = document.getElementById('treinos-clear-filters');
-    const exerciciosMin = document.getElementById('exercicios-min');
-    const exerciciosMax = document.getElementById('exercicios-max');
-    const professorFilter = document.getElementById('professor-filter');
+    
+    console.log('🔍 ELEMENTOS CRÍTICOS - TOGGLE DE TREINOS:');
+    console.log('- filterToggle (toggle-filters-treinos):', filterToggle);
+    console.log('- filtersPanel (treinos-filters):', filtersPanel);
+    
+    const clearFilters = document.getElementById('limpar-filtros-treinos'); // ID correto
+    const aplicarFiltros = document.getElementById('aplicar-filtros-treinos'); // ID correto
+    const professorFilter = document.getElementById('filtro-treino-professor'); // ID correto
+    const exercicioFilter = document.getElementById('filtro-treino-exercicio'); // ID correto
+    const descricaoFilter = document.getElementById('filtro-treino-descricao'); // ID correto
     const countSpan = document.getElementById('treinos-count');
 
-    console.log('Elementos encontrados:', {
+    console.log('🔍 ELEMENTOS DE TREINOS ENCONTRADOS:', {
         searchInput: !!searchInput,
         filterToggle: !!filterToggle,
         filtersPanel: !!filtersPanel,
         clearFilters: !!clearFilters,
-        exerciciosMin: !!exerciciosMin,
-        exerciciosMax: !!exerciciosMax,
+        aplicarFiltros: !!aplicarFiltros,
         professorFilter: !!professorFilter,
+        exercicioFilter: !!exercicioFilter,
+        descricaoFilter: !!descricaoFilter,
         countSpan: !!countSpan
     });
 
     if (!searchInput) {
         console.log('❌ Campo de busca de treinos não encontrado');
         return;
-    }
-
-    // Toggle dos filtros avançados
+    }    // Toggle dos filtros avançados
     if (filterToggle && filtersPanel) {
-        console.log('✅ Configurando toggle de filtros de treinos');
-        filterToggle.addEventListener('click', () => {
-            console.log('🔥 Toggle de treinos clicado!');
+        console.log('✅ CONFIGURANDO TOGGLE DE FILTROS DE TREINOS');
+        console.log('- Botão encontrado:', filterToggle);
+        console.log('- Panel encontrado:', filtersPanel);
+          filterToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('🔥 TOGGLE DE TREINOS CLICADO!');
             const isVisible = filtersPanel.style.display !== 'none';
-            filtersPanel.style.display = isVisible ? 'none' : 'block';
-            filterToggle.innerHTML = isVisible ? 
-                '<i class="fas fa-filter"></i> Filtros' : 
-                '<i class="fas fa-filter"></i> Ocultar';
-            console.log('Panel de treinos agora está:', filtersPanel.style.display);
+            console.log('- Estado atual do panel:', isVisible ? 'visível' : 'oculto');
+            
+            if (isVisible) {
+                filtersPanel.style.display = 'none';
+                filterToggle.innerHTML = '<i class="fas fa-filter"></i> Mostrar Filtros';            } else {
+                filtersPanel.style.display = 'block';
+                filterToggle.innerHTML = '<i class="fas fa-filter"></i> Ocultar Filtros';
+            }            
+            console.log('🎯 PANEL DE TREINOS AGORA ESTÁ:', filtersPanel.style.display);
         });
     } else {
-        console.log('❌ Elementos de toggle de treinos não encontrados:', {
+        console.log('❌ ELEMENTOS DE TOGGLE DE TREINOS NÃO ENCONTRADOS:', {
             filterToggle: !!filterToggle,
             filtersPanel: !!filtersPanel
         });
+        console.log('- Tentando encontrar por ID direto:');
+        console.log('- toggle-filters-treinos:', document.getElementById('toggle-filters-treinos'));
+        console.log('- treinos-filters:', document.getElementById('treinos-filters'));
     }
 
     // Limpar filtros
     if (clearFilters) {
         clearFilters.addEventListener('click', () => {
             searchInput.value = '';
-            if (exerciciosMin) exerciciosMin.value = '';
-            if (exerciciosMax) exerciciosMax.value = '';
             if (professorFilter) professorFilter.value = '';
+            if (exercicioFilter) exercicioFilter.value = '';
+            if (descricaoFilter) descricaoFilter.value = '';
             applyTreinosFilters();
         });
     }
 
-    // Event listeners para busca em tempo real
+    // Aplicar filtros
+    if (aplicarFiltros) {
+        aplicarFiltros.addEventListener('click', applyTreinosFilters);
+    }    // Event listeners para busca em tempo real
     if (searchInput) {
         searchInput.addEventListener('input', applyTreinosFilters);
     }
-    if (exerciciosMin) {
-        exerciciosMin.addEventListener('input', applyTreinosFilters);
-    }
-    if (exerciciosMax) {
-        exerciciosMax.addEventListener('input', applyTreinosFilters);
-    }
     if (professorFilter) {
-        professorFilter.addEventListener('change', applyTreinosFilters);
+        professorFilter.addEventListener('input', applyTreinosFilters);
     }
-}
-
-// Popular dropdown de professores para filtro
-function populateProfessorFilter() {
-    const professorFilter = document.getElementById('professor-filter');
-    if (!professorFilter || !data.professores) return;
-
-    // Extrair professores únicos
-    const professores = data.professores.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-
-    // Limpar e popular o select
-    professorFilter.innerHTML = '<option value="">Todos os professores</option>';
-    professores.forEach(professor => {
-        const option = document.createElement('option');
-        option.value = professor._id;
-        option.textContent = professor.nome || 'Professor sem nome';
-        professorFilter.appendChild(option);
-    });
+    if (exercicioFilter) {
+        exercicioFilter.addEventListener('input', applyTreinosFilters);
+    }
+    if (descricaoFilter) {
+        descricaoFilter.addEventListener('input', applyTreinosFilters);
+    }
 }
 
 // Aplicar filtros de treinos
@@ -2079,39 +2090,43 @@ function applyTreinosFilters() {
         updateTreinosCount();
         renderFilteredTreinos();
         return;
-    }
+    }    const searchTerm = document.getElementById('treinos-search')?.value.toLowerCase() || '';
+    const professorTerm = document.getElementById('filtro-treino-professor')?.value.toLowerCase() || '';
+    const exercicioTerm = document.getElementById('filtro-treino-exercicio')?.value.toLowerCase() || '';
+    const descricaoTerm = document.getElementById('filtro-treino-descricao')?.value.toLowerCase() || '';
 
-    const searchTerm = document.getElementById('treinos-search')?.value.toLowerCase() || '';
-    const exerciciosMin = parseInt(document.getElementById('exercicios-min')?.value) || 0;
-    const exerciciosMax = parseInt(document.getElementById('exercicios-max')?.value) || Infinity;
-    const professorId = document.getElementById('professor-filter')?.value || '';
+    console.log('🔍 Aplicando filtros de treinos:', { searchTerm, professorTerm, exercicioTerm, descricaoTerm });
 
-    console.log('🔍 Aplicando filtros de treinos:', { searchTerm, exerciciosMin, exerciciosMax, professorId });    filteredTreinos = data.treinos.filter(treino => {
-        // Busca por texto (nome do aluno, professor ou nome do treino)
+    filteredTreinos = data.treinos.filter(treino => {
+        // Busca geral (campo de busca principal) - apenas pelo nome do treino
         let matchesSearch = true;
         if (searchTerm) {
-            // Encontrar aluno e professor pelos IDs
-            const aluno = data.alunos.find(a => a._id === treino.alunoId) || data.alunos.find(a => a._id === treino.aluno);
-            const professor = data.professores.find(p => p._id === treino.professorId) || data.professores.find(p => p._id === treino.professor);
-            
-            const alunoNome = aluno ? aluno.nome : '';
-            const professorNome = professor ? professor.nome : '';
             const treinoNome = treino.nome || '';
-            
-            matchesSearch = 
-                alunoNome.toLowerCase().includes(searchTerm) ||
-                professorNome.toLowerCase().includes(searchTerm) ||
-                treinoNome.toLowerCase().includes(searchTerm);
+            matchesSearch = treinoNome.toLowerCase().includes(searchTerm);
         }
 
-        // Filtro por número de exercícios
-        const numExercicios = treino.exercicios ? treino.exercicios.length : 0;
-        const matchesExercicios = numExercicios >= exerciciosMin && numExercicios <= exerciciosMax;
+        // Filtro por professor (busca por nome)
+        let matchesProfessor = true;
+        if (professorTerm) {            const professor = data.professores.find(p => p._id === treino.professorId) || data.professores.find(p => p._id === treino.professor);
+            const professorNome = professor ? professor.nome : '';
+            matchesProfessor = professorNome.toLowerCase().includes(professorTerm);
+        }
 
-        // Filtro por professor
-        const matchesProfessor = !professorId || treino.professorId === professorId;
+        // Filtro por exercício contém
+        let matchesExercicio = true;
+        if (exercicioTerm) {
+            matchesExercicio = treino.exercicios && treino.exercicios.some(exercicio => 
+                // Os exercícios são strings simples
+                typeof exercicio === 'string' && exercicio.toLowerCase().includes(exercicioTerm)
+            );
+        }
 
-        return matchesSearch && matchesExercicios && matchesProfessor;
+        // Filtro por descrição contém
+        const matchesDescricao = !descricaoTerm || 
+            (treino.descricao && treino.descricao.toLowerCase().includes(descricaoTerm)) ||
+            (treino.observacoes && treino.observacoes.toLowerCase().includes(descricaoTerm));
+
+        return matchesSearch && matchesProfessor && matchesExercicio && matchesDescricao;
     });
 
     console.log(`📊 Treinos filtrados: ${filteredTreinos.length} de ${data.treinos.length}`);
@@ -2148,18 +2163,24 @@ function renderFilteredTreinos() {
         // Encontrar aluno e professor pelos IDs
         const aluno = data.alunos.find(a => a._id === treino.alunoId) || data.alunos.find(a => a._id === treino.aluno);
         const professor = data.professores.find(p => p._id === treino.professorId) || data.professores.find(p => p._id === treino.professor);
-        
-        const alunoNome = aluno ? aluno.nome : 'Aluno não encontrado';
+          const alunoNome = aluno ? aluno.nome : 'Aluno não encontrado';
         const professorNome = professor ? professor.nome : 'Professor não encontrado';
         const numExercicios = treino.exercicios ? treino.exercicios.length : 0;
+          // Criar lista de nomes dos exercícios
+        let exerciciosNomes = '';
+        if (treino.exercicios && treino.exercicios.length > 0) {
+            // Os exercícios são strings simples, não objetos
+            exerciciosNomes = treino.exercicios.join(', ');
+        } else {
+            exerciciosNomes = 'Nenhum exercício cadastrado';
+        }
         
         card.innerHTML = `
             <div class="item-info">
                 <h3>${highlightSearchTermTreinos(treino.nome || 'Treino sem nome')}</h3>
                 <p><strong>Aluno:</strong> ${highlightSearchTermTreinos(alunoNome)}</p>
                 <p><strong>Professor:</strong> ${highlightSearchTermTreinos(professorNome)}</p>
-                <p><strong>Exercícios:</strong> <span class="badge badge-info">${numExercicios}</span></p>
-                <p><strong>Data:</strong> ${treino.data ? new Date(treino.data).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                <p><strong>Exercícios (${numExercicios}):</strong> ${highlightSearchTermTreinos(exerciciosNomes)}</p>
             </div>
             <div class="item-actions">
                 <button class="btn btn-secondary btn-small" onclick="editTreino('${treino._id}')">
