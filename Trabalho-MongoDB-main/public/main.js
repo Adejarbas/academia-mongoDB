@@ -1806,20 +1806,18 @@ function highlightSearchTermTreinos(text) {
 // Configurar busca e filtros para professores
 function setupProfessoresSearch() {
     console.log('🔍 Configurando busca de professores...');
-    
-    const searchInput = document.getElementById('professores-search');
-    const filterToggle = document.getElementById('professores-filter-toggle');
+      const searchInput = document.getElementById('professores-search');
+    const filterToggle = document.getElementById('toggle-filters-professores');
     const filtersPanel = document.getElementById('professores-filters');
-    const clearFilters = document.getElementById('professores-clear-filters');
-    const especialidadeFilter = document.getElementById('especialidade-filter');
-    const countSpan = document.getElementById('professores-count');
-
-    console.log('Elementos encontrados:', {
+    const clearFilters = document.getElementById('limpar-filtros-professores');
+    const especialidadeFilter = document.getElementById('filtro-prof-especialidade');
+    const countSpan = document.getElementById('professores-count');    console.log('Elementos encontrados:', {
         searchInput: !!searchInput,
         filterToggle: !!filterToggle,
         filtersPanel: !!filtersPanel,
         clearFilters: !!clearFilters,
         especialidadeFilter: !!especialidadeFilter,
+        aplicarFiltros: !!document.getElementById('aplicar-filtros-professores'),
         countSpan: !!countSpan
     });
 
@@ -1845,9 +1843,7 @@ function setupProfessoresSearch() {
             filterToggle: !!filterToggle,
             filtersPanel: !!filtersPanel
         });
-    }
-
-    // Limpar filtros
+    }    // Limpar filtros
     if (clearFilters) {
         clearFilters.addEventListener('click', () => {
             searchInput.value = '';
@@ -1856,12 +1852,23 @@ function setupProfessoresSearch() {
         });
     }
 
+    // Botão aplicar filtros
+    const aplicarFiltros = document.getElementById('aplicar-filtros-professores');
+    if (aplicarFiltros) {
+        aplicarFiltros.addEventListener('click', applyProfessoresFilters);
+    }
+
     // Event listeners para busca em tempo real
     if (searchInput) {
         searchInput.addEventListener('input', applyProfessoresFilters);
     }
     if (especialidadeFilter) {
-        especialidadeFilter.addEventListener('change', applyProfessoresFilters);
+        especialidadeFilter.addEventListener('input', applyProfessoresFilters);
+    }
+    
+    const nomeFilter = document.getElementById('filtro-prof-nome');
+    if (nomeFilter) {
+        nomeFilter.addEventListener('input', applyProfessoresFilters);
     }
 }
 
@@ -1890,17 +1897,18 @@ function populateEspecialidadeFilter() {
 // Aplicar filtros aos professores
 function applyProfessoresFilters() {
     const searchTerm = document.getElementById('professores-search')?.value.toLowerCase() || '';
-    const especialidadeSelecionada = document.getElementById('especialidade-filter')?.value || '';
+    const especialidadeFilter = document.getElementById('filtro-prof-especialidade')?.value.toLowerCase() || '';
 
     filteredProfessores = data.professores.filter(professor => {
-        // Busca por nome e email
+        // Busca geral (campo de busca principal)
         const matchesSearch = !searchTerm || 
             (professor.nome && professor.nome.toLowerCase().includes(searchTerm)) ||
-            (professor.email && professor.email.toLowerCase().includes(searchTerm));
+            (professor.email && professor.email.toLowerCase().includes(searchTerm)) ||
+            (professor.especialidade && professor.especialidade.toLowerCase().includes(searchTerm));
 
-        // Filtro por especialidade
-        const matchesEspecialidade = !especialidadeSelecionada || 
-            (professor.especialidade && professor.especialidade === especialidadeSelecionada);
+        // Filtro específico por especialidade
+        const matchesEspecialidade = !especialidadeFilter || 
+            (professor.especialidade && professor.especialidade.toLowerCase().includes(especialidadeFilter));
 
         return matchesSearch && matchesEspecialidade;
     });
