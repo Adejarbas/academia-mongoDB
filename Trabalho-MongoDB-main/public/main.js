@@ -1817,6 +1817,7 @@ function setupProfessoresSearch() {
         filtersPanel: !!filtersPanel,
         clearFilters: !!clearFilters,
         especialidadeFilter: !!especialidadeFilter,
+        nomeFilter: !!document.getElementById('filtro-prof-nome'),
         aplicarFiltros: !!document.getElementById('aplicar-filtros-professores'),
         countSpan: !!countSpan
     });
@@ -1848,6 +1849,8 @@ function setupProfessoresSearch() {
         clearFilters.addEventListener('click', () => {
             searchInput.value = '';
             if (especialidadeFilter) especialidadeFilter.value = '';
+            const nomeFilter = document.getElementById('filtro-prof-nome');
+            if (nomeFilter) nomeFilter.value = '';
             applyProfessoresFilters();
         });
     }
