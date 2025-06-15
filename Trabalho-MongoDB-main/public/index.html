@@ -1,0 +1,557 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymPro Admin - Sistema de Gerenciamento</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard-container" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>GymPro Admin</h2>
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="home">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-section="alunos">
+                    <i class="fas fa-users"></i>
+                    Alunos
+                </a>
+                <a href="#" class="nav-item" data-section="professores">
+                    <i class="fas fa-user-check"></i>
+                    Professores
+                </a>
+                <a href="#" class="nav-item" data-section="treinos">
+                    <i class="fas fa-dumbbell"></i>
+                    Treinos
+                </a>
+                <a href="#" class="nav-item" data-section="planos">
+                    <i class="fas fa-credit-card"></i>
+                    Planos
+                </a>
+                <div class="sidebar-footer">
+                    <a href="#" class="nav-item logout" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Sair
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="page-title">Dashboard Administrativo</h1>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content" id="content">
+                <!-- Home Section -->
+                <div id="home-section" class="section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-alunos">2</h3>
+                                <p>Alunos Ativos</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-professores">2</h3>
+                                <p>Professores</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-treinos">2</h3>
+                                <p>Treinos Este Mês</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>+8%</h3>
+                                <p>Crescimento</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alunos Section -->
+                <div id="alunos-section" class="section">
+                    <div class="section-header">
+                        <h2>Gerenciar Alunos</h2>
+                        <button class="btn btn-primary" onclick="openModal('aluno-modal')">
+                            <i class="fas fa-plus"></i>
+                            Novo Aluno
+                        </button>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="alunos-search" placeholder="Buscar alunos..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <!-- Filtros Avançados para Alunos -->
+                    <div class="filters-container">
+                        <div class="filters-header">
+                            <h4>Filtros Avançados</h4>
+                            <button type="button" class="btn btn-small btn-secondary" id="toggle-filters-alunos">
+                                <i class="fas fa-filter"></i>
+                                Mostrar Filtros
+                            </button>
+                        </div>
+                        <div class="filters-content" id="alunos-filters" style="display: none;">
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="filtro-idade-min">Idade Mínima:</label>
+                                    <input type="number" id="filtro-idade-min" placeholder="Ex: 18" min="0" max="100">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-idade-max">Idade Máxima:</label>
+                                    <input type="number" id="filtro-idade-max" placeholder="Ex: 65" min="0" max="100">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-peso-min">Peso Mínimo (kg):</label>
+                                    <input type="number" id="filtro-peso-min" placeholder="Ex: 50" step="0.1" min="0">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-peso-max">Peso Máximo (kg):</label>
+                                    <input type="number" id="filtro-peso-max" placeholder="Ex: 100" step="0.1" min="0">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-email">Email contém:</label>
+                                    <input type="text" id="filtro-email" placeholder="Ex: @gmail.com">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-telefone">Telefone contém:</label>
+                                    <input type="text" id="filtro-telefone" placeholder="Ex: (11)">
+                                </div>
+                            </div>
+                            <div class="filters-actions">
+                                <button type="button" class="btn btn-primary" id="aplicar-filtros-alunos">
+                                    <i class="fas fa-search"></i>
+                                    Aplicar Filtros
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="limpar-filtros-alunos">
+                                    <i class="fas fa-times"></i>
+                                    Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="alunos-list" class="items-grid"></div>
+                </div>
+
+                <!-- Professores Section -->
+                <div id="professores-section" class="section">
+                    <div class="section-header">
+                        <h2>Gerenciar Professores</h2>
+                        <button class="btn btn-primary" onclick="openModal('professor-modal')">
+                            <i class="fas fa-plus"></i>
+                            Novo Professor
+                        </button>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="professores-search" placeholder="Buscar professores..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <!-- Filtros Avançados para Professores -->
+                    <div class="filters-container">
+                        <div class="filters-header">
+                            <h4>Filtros Avançados</h4>
+                            <button type="button" class="btn btn-small btn-secondary" id="toggle-filters-professores">
+                                <i class="fas fa-filter"></i>
+                                Mostrar Filtros
+                            </button>
+                        </div>
+                        <div class="filters-content" id="professores-filters" style="display: none;">
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="filtro-prof-especialidade">Especialidade:</label>
+                                    <input type="text" id="filtro-prof-especialidade" placeholder="Ex: Musculação">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-prof-email">Email contém:</label>
+                                    <input type="text" id="filtro-prof-email" placeholder="Ex: @gmail.com">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-prof-telefone">Telefone contém:</label>
+                                    <input type="text" id="filtro-prof-telefone" placeholder="Ex: (11)">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-prof-nome">Nome contém:</label>
+                                    <input type="text" id="filtro-prof-nome" placeholder="Ex: Silva">
+                                </div>
+                            </div>
+                            <div class="filters-actions">
+                                <button type="button" class="btn btn-primary" id="aplicar-filtros-professores">
+                                    <i class="fas fa-search"></i>
+                                    Aplicar Filtros
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="limpar-filtros-professores">
+                                    <i class="fas fa-times"></i>
+                                    Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="professores-list" class="items-grid"></div>
+                </div>
+
+                <!-- Treinos Section -->
+                <div id="treinos-section" class="section">
+                    <div class="section-header">
+                        <h2>Gerenciar Treinos</h2>
+                        <button class="btn btn-primary" onclick="openModal('treino-modal')">
+                            <i class="fas fa-plus"></i>
+                            Novo Treino
+                        </button>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="treinos-search" placeholder="Buscar treinos..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <!-- Filtros Avançados para Treinos -->
+                    <div class="filters-container">
+                        <div class="filters-header">
+                            <h4>Filtros Avançados</h4>
+                            <button type="button" class="btn btn-small btn-secondary" id="toggle-filters-treinos">
+                                <i class="fas fa-filter"></i>
+                                Mostrar Filtros
+                            </button>
+                        </div>
+                        <div class="filters-content" id="treinos-filters" style="display: none;">
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="filtro-treino-professor">Professor:</label>
+                                    <select id="filtro-treino-professor">
+                                        <option value="">Todos os professores</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-treino-aluno">Aluno:</label>
+                                    <select id="filtro-treino-aluno">
+                                        <option value="">Todos os alunos</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-treino-exercicio">Exercício contém:</label>
+                                    <input type="text" id="filtro-treino-exercicio" placeholder="Ex: Supino">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-treino-descricao">Descrição contém:</label>
+                                    <input type="text" id="filtro-treino-descricao" placeholder="Ex: Peito">
+                                </div>
+                            </div>
+                            <div class="filters-actions">
+                                <button type="button" class="btn btn-primary" id="aplicar-filtros-treinos">
+                                    <i class="fas fa-search"></i>
+                                    Aplicar Filtros
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="limpar-filtros-treinos">
+                                    <i class="fas fa-times"></i>
+                                    Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="treinos-list" class="items-grid"></div>
+                </div>
+
+                <!-- Planos Section -->
+                <div id="planos-section" class="section">
+                    <div class="section-header">
+                        <h2>Gerenciar Planos</h2>
+                        <div class="button-group">
+                            <button class="btn btn-success" onclick="openModal('atribuir-plano-modal')">
+                                <i class="fas fa-user"></i>
+                                Atribuir Plano
+                            </button>
+                            <button class="btn btn-primary" onclick="openModal('plano-modal')">
+                                <i class="fas fa-plus"></i>
+                                Novo Plano
+                            </button>
+                        </div>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="planos-search" placeholder="Buscar planos..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <!-- Filtros Avançados para Planos -->
+                    <div class="filters-container">
+                        <div class="filters-header">
+                            <h4>Filtros Avançados</h4>
+                            <button type="button" class="btn btn-small btn-secondary" id="toggle-filters-planos">
+                                <i class="fas fa-filter"></i>
+                                Mostrar Filtros
+                            </button>
+                        </div>
+                        <div class="filters-content" id="planos-filters" style="display: none;">
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="filtro-plano-preco-min">Preço Mínimo (R$):</label>
+                                    <input type="number" id="filtro-plano-preco-min" placeholder="Ex: 50" step="0.01" min="0">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-plano-preco-max">Preço Máximo (R$):</label>
+                                    <input type="number" id="filtro-plano-preco-max" placeholder="Ex: 200" step="0.01" min="0">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-plano-duracao-min">Duração Mínima (meses):</label>
+                                    <input type="number" id="filtro-plano-duracao-min" placeholder="Ex: 1" min="1">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-plano-duracao-max">Duração Máxima (meses):</label>
+                                    <input type="number" id="filtro-plano-duracao-max" placeholder="Ex: 12" min="1">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtro-plano-descricao">Descrição contém:</label>
+                                    <input type="text" id="filtro-plano-descricao" placeholder="Ex: Premium">
+                                </div>
+                            </div>
+                            <div class="filters-actions">
+                                <button type="button" class="btn btn-primary" id="aplicar-filtros-planos">
+                                    <i class="fas fa-search"></i>
+                                    Aplicar Filtros
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="limpar-filtros-planos">
+                                    <i class="fas fa-times"></i>
+                                    Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="planos-container">
+                        <div class="planos-section">
+                            <h3>Planos dos Alunos</h3>
+                            <div id="planos-alunos-list" class="items-grid"></div>
+                        </div>
+                        
+                        <div class="planos-section">
+                            <h3>Planos Disponíveis</h3>
+                            <div id="planos-disponiveis-list" class="planos-grid"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Aluno Modal -->
+    <div id="aluno-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="aluno-modal-title">Novo Aluno</h3>
+                <button class="close-btn" onclick="closeModal('aluno-modal')">&times;</button>
+            </div>
+            <form id="aluno-form">
+                <div class="form-group">
+                    <label for="aluno-nome">Nome:</label>
+                    <input type="text" id="aluno-nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="aluno-email">Email:</label>
+                    <input type="email" id="aluno-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="aluno-telefone">Telefone:</label>
+                    <input type="tel" id="aluno-telefone" name="telefone" required>
+                </div>
+                <div class="form-group">
+                    <label for="aluno-nascimento">Data de Nascimento:</label>
+                    <input type="date" id="aluno-nascimento" name="dataNascimento" required>
+                </div>
+                <div class="form-group">
+                    <label for="aluno-peso">Peso (kg):</label>
+                    <input type="number" id="aluno-peso" name="peso" step="0.1" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('aluno-modal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Professor Modal -->
+    <div id="professor-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="professor-modal-title">Novo Professor</h3>
+                <button class="close-btn" onclick="closeModal('professor-modal')">&times;</button>
+            </div>
+            <form id="professor-form">
+                <div class="form-group">
+                    <label for="professor-nome">Nome:</label>
+                    <input type="text" id="professor-nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="professor-email">Email:</label>
+                    <input type="email" id="professor-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="professor-especialidade">Especialidade:</label>
+                    <input type="text" id="professor-especialidade" name="especialidade" required>
+                </div>
+                <div class="form-group">
+                    <label for="professor-telefone">Telefone:</label>
+                    <input type="tel" id="professor-telefone" name="telefone">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('professor-modal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Treino Modal -->
+    <div id="treino-modal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="treino-modal-title">Novo Treino</h3>
+                <button class="close-btn" onclick="closeModal('treino-modal')">&times;</button>
+            </div>
+            <form id="treino-form">
+                <div class="form-group">
+                    <label for="treino-nome">Nome do Treino:</label>
+                    <input type="text" id="treino-nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="treino-descricao">Descrição:</label>
+                    <textarea id="treino-descricao" name="descricao" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="treino-professor">Professor:</label>
+                    <select id="treino-professor" name="professor" required>
+                        <option value="">Selecione um professor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="treino-aluno">Aluno:</label>
+                    <select id="treino-aluno" name="aluno" required>
+                        <option value="">Selecione um aluno</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Exercícios:</label>
+                    <div class="exercicios-container">
+                        <div class="exercicio-input-group">
+                            <input type="text" id="exercicio-input" placeholder="Digite um exercício...">
+                            <button type="button" class="btn btn-small" onclick="addExercicio()">Adicionar</button>
+                        </div>
+                        <div id="exercicios-list" class="exercicios-list"></div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('treino-modal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Plano Modal -->
+    <div id="plano-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="plano-modal-title">Novo Plano</h3>
+                <button class="close-btn" onclick="closeModal('plano-modal')">&times;</button>
+            </div>
+            <form id="plano-form">
+                <div class="form-group">
+                    <label for="plano-nome">Nome do Plano:</label>
+                    <input type="text" id="plano-nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="plano-descricao">Descrição:</label>
+                    <textarea id="plano-descricao" name="descricao" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="plano-preco">Preço (R$):</label>
+                    <input type="number" id="plano-preco" name="preco" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="plano-duracao">Duração (meses):</label>
+                    <input type="number" id="plano-duracao" name="duracaoMeses" min="1" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('plano-modal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Atribuir Plano Modal -->
+    <div id="atribuir-plano-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Atribuir Plano ao Aluno</h3>
+                <button class="close-btn" onclick="closeModal('atribuir-plano-modal')">&times;</button>
+            </div>
+            <form id="atribuir-plano-form">
+                <div class="form-group">
+                    <label for="atribuir-aluno">Aluno:</label>
+                    <select id="atribuir-aluno" name="alunoId" required>
+                        <option value="">Selecione um aluno</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="atribuir-plano">Plano:</label>
+                    <select id="atribuir-plano" name="planoId" required>
+                        <option value="">Selecione um plano</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="atribuir-data">Data de Início:</label>
+                    <input type="date" id="atribuir-data" name="dataInicio" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">Atribuir Plano</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('atribuir-plano-modal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <script src="main.js"></script>
+</body>
+</html>

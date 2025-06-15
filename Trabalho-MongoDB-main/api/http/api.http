@@ -1,0 +1,37 @@
+Como usar:
+Instale a extensão REST Client no VS Code.
+
+### Listar todos os alunos
+GET https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos
+
+### Buscar aluno por ID
+GET https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos/id
+
+### Criar novo aluno
+POST https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos
+Content-Type: application/json
+
+{
+  "nome": "Teste REST",
+  "email": "rest@email.com",
+  "telefone": "11999999999",
+  "dataNascimento": "2000-01-01",
+  "idade": 22,
+  "peso": 70.5
+}
+
+### Atualizar aluno
+PUT https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos/id
+Content-Type: application/json
+
+{
+  "nome": "Nome Atualizado",
+  "email": "rest@email.com",
+  "telefone": "11999999999",
+  "dataNascimento": "2000-01-01",
+  "idade": 23,
+  "peso": 72.0
+}
+
+### Deletar aluno
+DELETE https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos/id
