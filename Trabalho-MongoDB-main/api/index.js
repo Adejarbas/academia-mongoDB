@@ -9,6 +9,7 @@ import alunoRoutes from './routes/alunoRoutes.js'
 import professorRoutes from './routes/professorRoutes.js'
 import treinoRoutes from './routes/treinoRoutes.js'
 import planoRoutes from './routes/planoRoutes.js'
+import planoAlunoRoutes from './routes/planoAlunoRoutes.js'
 
 const app = express()
 app.use(cors())
@@ -33,6 +34,7 @@ app.use('/api/alunos', alunoRoutes)
 app.use('/api/professores', professorRoutes)
 app.use('/api/treinos', treinoRoutes)
 app.use('/api/planos', planoRoutes)
+app.use('/api/plano-alunos', planoAlunoRoutes)
 
 // Middleware de erro
 app.use((err, req, res, next) => {
