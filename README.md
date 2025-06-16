@@ -6,4 +6,5 @@
 - **Taise Miguel Rodrigues** - [GitHub](https://github.com/TaiseMiguel)
 
 
-Acesse o site: [academia-mongo-db.vercel.app](https://academia-mongo-db.vercel.app/)
+- Acesse o site: [academia-mongo-db.vercel.app](https://academia-mongo-db.vercel.app/)
+- Documentação Swagger:  http://localhost:3000/api-docs - https://academia-mongodb.vercel.app/api-docs
