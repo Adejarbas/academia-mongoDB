@@ -135,15 +135,19 @@ if (isProduction) {
   app.use(express.static(publicPath, { index: false }))
 }
 
-// Suas rotas de API
-app.use('/api/auth', authRoutes)
-app.use('/api/alunos', alunoRoutes)
-app.use('/api/professores', professorRoutes)
-app.use('/api/treinos', treinoRoutes)
-app.use('/api/planos', planoRoutes)
-app.use('/api/plano-alunos', planoAlunoRoutes)
+// Rotas de teste e health check (SEM autenticação)
+app.get('/api/test', (req, res) => {
+  // #swagger.ignore = true
+  console.log('🧪 Rota de teste acessada')
+  res.json({ 
+    message: 'API Test funcionando!',
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    url: req.url,
+    environment: process.env.NODE_ENV || 'development'
+  })
+})
 
-// Rota de health check para debug
 app.get('/api/health', (req, res) => {
   // #swagger.ignore = true
   console.log('🩺 Health check acessado')
@@ -154,6 +158,14 @@ app.get('/api/health', (req, res) => {
     message: 'API funcionando corretamente'
   })
 })
+
+// Suas rotas de API (COM autenticação)
+app.use('/api/auth', authRoutes)
+app.use('/api/alunos', alunoRoutes)
+app.use('/api/professores', professorRoutes)
+app.use('/api/treinos', treinoRoutes)
+app.use('/api/planos', planoRoutes)
+app.use('/api/plano-alunos', planoAlunoRoutes)
 
 // Middleware de erro
 app.use((err, req, res, next) => {

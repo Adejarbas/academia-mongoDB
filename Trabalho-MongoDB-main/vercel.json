@@ -1,11 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node" },
-    { "src": "api/test.js", "use": "@vercel/node" }
+    { "src": "api/index.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/test", "dest": "/api/test.js" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/api-docs", "dest": "/api/index.js" },
     { "src": "/api-docs/(.*)", "dest": "/api/index.js" },
@@ -16,9 +14,6 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 10
-    },
-    "api/test.js": {
-      "maxDuration": 5
     }
   },
   "env": {
