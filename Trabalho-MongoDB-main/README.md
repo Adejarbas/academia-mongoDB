@@ -24,14 +24,14 @@ Este projeto tem como objetivo demonstrar a criação de uma aplicação web ful
 
 > 🚧 **Em desenvolvimento**: A API será hospedada em breve na Vercel
 > 
-> 📱 **Frontend**: Pode ser executado localmente abrindo o arquivo `public/index.html`
+> 📱 **Frontend**: Pode ser executado localmente abrindo o arquivo `public/home.html`
 
 ## 🚀 Como rodar localmente
 
 ### 1. Clone o repositório:
 ```bash
 git clone https://github.com/Adejarbas/academia-mongoDB.git
-cd academia-mongoDB
+cd academia-mongoDB-main
 ```
 
 ### 2. Instale as dependências:
@@ -58,7 +58,7 @@ npm start
 
 ### 5. Acesse a aplicação:
 - **API**: `http://localhost:3000`
-- **Frontend**: Abra o arquivo `public/index.html` no navegador
+- **Frontend**: Abra o arquivo `public/home.html` no navegador
 
 ## 🛠️ Tecnologias Utilizadas
 
