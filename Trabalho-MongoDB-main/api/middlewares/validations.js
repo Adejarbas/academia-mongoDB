@@ -110,9 +110,13 @@ export const validateProfessor = [
         .notEmpty()
         .withMessage("A especialidade é obrigatória"),
 
+    check("telefone")
+        .optional({ checkFalsy: true })
+        .isLength({ min: 10 })
+        .withMessage("Telefone deve ter pelo menos 10 dígitos"),
+
     check("salario")
-        .notEmpty()
-        .withMessage("O salário é obrigatório")
+        .optional()
         .isFloat({ min: 0 })
         .withMessage("O salário deve ser um número decimal positivo"),
 
@@ -134,14 +138,12 @@ export const validateTreino = [
         .withMessage("Deve haver pelo menos um exercício"),
 
     check("duracao")
-        .notEmpty()
-        .withMessage("A duração é obrigatória")
+        .optional()
         .isInt({ min: 1 })
         .withMessage("A duração deve ser um número inteiro positivo (em minutos)"),
 
     check("dificuldade")
-        .notEmpty()
-        .withMessage("A dificuldade é obrigatória")
+        .optional()
         .isInt({ min: 1, max: 10 })
         .withMessage("A dificuldade deve ser um número inteiro entre 1 e 10"),
 
@@ -149,6 +151,16 @@ export const validateTreino = [
         .optional()
         .isMongoId()
         .withMessage("ID do professor inválido"),
+
+    check("aluno")
+        .optional()
+        .isMongoId()
+        .withMessage("ID do aluno inválido"),
+
+    check("descricao")
+        .optional()
+        .isLength({ max: 500 })
+        .withMessage("A descrição deve ter no máximo 500 caracteres"),
 
     validateRequest
 ];
