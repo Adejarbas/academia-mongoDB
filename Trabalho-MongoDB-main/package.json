@@ -5,6 +5,8 @@
   "main": "api/index.js",  "scripts": {
     "start": "node api/index.js",
     "dev": "nodemon api/index.js",
+    "build": "node swagger.js",
+    "vercel-build": "node swagger.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
