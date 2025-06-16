@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const planoSchema = new mongoose.Schema({
     nome: { 
@@ -6,8 +6,23 @@ const planoSchema = new mongoose.Schema({
         required: true 
     },
     descricao: String,
-    preco: Number,
-    duracaoMeses: Number
+    preco: { 
+        type: Number, 
+        required: true 
+    }, // Campo decimal
+    duracaoMeses: { 
+        type: Number, 
+        required: true 
+    }, // Campo inteiro
+    dataInicio: { 
+        type: Date, 
+        default: Date.now 
+    }, // Campo data
+    ativo: { 
+        type: Boolean, 
+        default: true 
+    },
+    beneficios: [String] // Array de benefícios
 });
 
-module.exports = mongoose.model('Plano', planoSchema);
+export default mongoose.model('Plano', planoSchema);

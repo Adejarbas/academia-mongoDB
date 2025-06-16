@@ -1,37 +1,204 @@
-Como usar:
-Instale a extensão REST Client no VS Code.
+# 📋 Documentação da API - Academia MongoDB
+
+## Como usar:
+1. Instale a extensão REST Client no VS Code
+2. Substitua os IDs pelos IDs reais dos registros
+3. Configure o token de autenticação nas variáveis
+
+@baseUrl = https://trabalho-mongo-db.vercel.app
+@token = SEU_TOKEN_AQUI
+
+# ====================
+# 👥 ALUNOS
+# ====================
 
 ### Listar todos os alunos
-GET https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos
+GET {{baseUrl}}/alunos
+Authorization: Bearer {{token}}
 
 ### Buscar aluno por ID
-GET https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos/id
+GET {{baseUrl}}/alunos/ID_DO_ALUNO
+Authorization: Bearer {{token}}
+
+### Consulta avançada de alunos (operadores $gt)
+GET {{baseUrl}}/alunos/consulta/avancada?idade=20&peso=65
+Authorization: Bearer {{token}}
+
+### Consulta complexa de alunos (múltiplos operadores: $or, $and, $gte, $lt, $in)
+GET {{baseUrl}}/alunos/consulta/complexa?pesoMin=60&pesoMax=90&idades=18,25,30&nomes=João,Maria
+Authorization: Bearer {{token}}
 
 ### Criar novo aluno
-POST https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos
+POST {{baseUrl}}/alunos
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "nome": "Teste REST",
-  "email": "rest@email.com",
+  "nome": "João Silva",
+  "email": "joao@email.com",
   "telefone": "11999999999",
   "dataNascimento": "2000-01-01",
-  "idade": 22,
-  "peso": 70.5
+  "idade": 24,
+  "peso": 75.5,
+  "endereco": "Rua das Flores, 123"
 }
 
 ### Atualizar aluno
-PUT https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos/id
+PUT {{baseUrl}}/alunos/ID_DO_ALUNO
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "nome": "Nome Atualizado",
-  "email": "rest@email.com",
-  "telefone": "11999999999",
+  "nome": "João Silva Santos",
+  "email": "joao.santos@email.com",
+  "telefone": "11988888888",
   "dataNascimento": "2000-01-01",
-  "idade": 23,
-  "peso": 72.0
+  "idade": 24,
+  "peso": 77.0
 }
 
 ### Deletar aluno
-DELETE https://trabalho-mongo-8sv3pgxi6-daniels-projects-d1901ee1.vercel.app/alunos/id
+DELETE {{baseUrl}}/alunos/ID_DO_ALUNO
+Authorization: Bearer {{token}}
+
+# ====================
+# 👨‍🏫 PROFESSORES
+# ====================
+
+### Listar todos os professores
+GET {{baseUrl}}/professores
+Authorization: Bearer {{token}}
+
+### Buscar professor por ID
+GET {{baseUrl}}/professores/ID_DO_PROFESSOR
+Authorization: Bearer {{token}}
+
+### Criar novo professor
+POST {{baseUrl}}/professores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Maria Santos",
+  "email": "maria@email.com",
+  "especialidade": "Musculação",
+  "telefone": "11977777777"
+}
+
+### Atualizar professor
+PUT {{baseUrl}}/professores/ID_DO_PROFESSOR
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Maria Santos Silva",
+  "email": "maria.silva@email.com",
+  "especialidade": "Musculação e Crossfit",
+  "telefone": "11966666666"
+}
+
+### Deletar professor
+DELETE {{baseUrl}}/professores/ID_DO_PROFESSOR
+Authorization: Bearer {{token}}
+
+# ====================
+# 🏋️‍♂️ TREINOS
+# ====================
+
+### Listar todos os treinos
+GET {{baseUrl}}/treinos
+Authorization: Bearer {{token}}
+
+### Buscar treino por ID
+GET {{baseUrl}}/treinos/ID_DO_TREINO
+Authorization: Bearer {{token}}
+
+### Criar novo treino
+POST {{baseUrl}}/treinos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Treino de Peito",
+  "descricao": "Exercícios focados no desenvolvimento do peitoral",
+  "exercicios": ["Supino", "Crucifixo", "Flexão"],
+  "professor": "ID_DO_PROFESSOR"
+}
+
+### Atualizar treino
+PUT {{baseUrl}}/treinos/ID_DO_TREINO
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Treino de Peito Avançado",
+  "descricao": "Exercícios avançados para peitoral",
+  "exercicios": ["Supino", "Crucifixo", "Flexão", "Paralelas"]
+}
+
+### Deletar treino
+DELETE {{baseUrl}}/treinos/ID_DO_TREINO
+Authorization: Bearer {{token}}
+
+# ====================
+# 💳 PLANOS
+# ====================
+
+### Listar todos os planos
+GET {{baseUrl}}/planos
+Authorization: Bearer {{token}}
+
+### Buscar plano por ID
+GET {{baseUrl}}/planos/ID_DO_PLANO
+Authorization: Bearer {{token}}
+
+### Criar novo plano
+POST {{baseUrl}}/planos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Plano Premium",
+  "descricao": "Acesso completo à academia com personal trainer",
+  "preco": 159.90,
+  "duracaoMeses": 12
+}
+
+### Atualizar plano
+PUT {{baseUrl}}/planos/ID_DO_PLANO
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Plano Premium Plus",
+  "descricao": "Acesso completo + aulas em grupo",
+  "preco": 179.90,
+  "duracaoMeses": 12
+}
+
+### Deletar plano
+DELETE {{baseUrl}}/planos/ID_DO_PLANO
+Authorization: Bearer {{token}}
+
+# ====================
+# 🔐 AUTENTICAÇÃO
+# ====================
+
+### Registrar usuário
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Teste User",
+  "email": "teste@email.com",
+  "password": "123456"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "password": "123456"
+}

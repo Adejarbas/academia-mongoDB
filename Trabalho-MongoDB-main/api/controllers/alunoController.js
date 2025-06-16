@@ -227,3 +227,67 @@ export async function getAlunosAvancado(req, res, next) {
     next(err);
   }
 }
+
+// Nova consulta com múltiplos operadores: $in, $or, $lt, $gte
+export async function getAlunosComplexo(req, res, next) {
+  try {
+    console.log('🔍 Busca complexa para usuário:', req.user._id);
+    
+    const db = getDb();
+    const { idades, pesoMin, pesoMax, nomes } = req.query;
+    
+    // Construir query complexa
+    let query = {
+      $or: [
+        { 
+          $and: [
+            { peso: { $gte: Number(pesoMin) || 60 } },
+            { peso: { $lt: Number(pesoMax) || 100 } }
+          ]
+        },
+        {
+          idade: { 
+            $in: idades ? idades.split(',').map(Number) : [18, 25, 30] 
+          }
+        }
+      ]
+    };
+    
+    // Adicionar filtro por nomes se fornecido
+    if (nomes) {
+      query.$or.push({
+        nome: { 
+          $in: nomes.split(',').map(nome => new RegExp(nome, 'i')) 
+        }
+      });
+    }
+    
+    // Se não for admin, filtrar apenas os alunos do usuário logado
+    if (req.user.role !== 'admin') {
+      query.userId = req.user._id.toString();
+    }
+    
+    console.log('🔍 Query complexa:', JSON.stringify(query, null, 2));
+    
+    const alunos = await db.collection('alunos').find(query).toArray();
+    
+    console.log('📊 Alunos encontrados na busca complexa:', alunos.length);
+    
+    res.json({
+      success: true,
+      message: 'Busca complexa executada com sucesso',
+      operadores_usados: ['$or', '$and', '$gte', '$lt', '$in'],
+      filtros: { 
+        pesoMin: Number(pesoMin) || 60,
+        pesoMax: Number(pesoMax) || 100,
+        idades: idades ? idades.split(',').map(Number) : [18, 25, 30],
+        nomes: nomes ? nomes.split(',') : null
+      },
+      total: alunos.length,
+      data: alunos
+    });
+  } catch (err) {
+    console.error('❌ Erro na busca complexa:', err);
+    next(err);
+  }
+}

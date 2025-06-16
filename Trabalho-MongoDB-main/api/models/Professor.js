@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const professorSchema = new mongoose.Schema({
     nome: { 
@@ -10,8 +10,23 @@ const professorSchema = new mongoose.Schema({
         required: true, 
         unique: true 
     },
-    especialidade: String,
-    telefone: String
+    especialidade: { 
+        type: String, 
+        required: true 
+    },
+    telefone: String,
+    dataContratacao: { 
+        type: Date, 
+        default: Date.now 
+    }, // Campo data
+    salario: { 
+        type: Number, 
+        required: true 
+    }, // Campo decimal
+    ativo: { 
+        type: Boolean, 
+        default: true 
+    }
 });
 
-module.exports = mongoose.model('Professor', professorSchema);
+export default mongoose.model('Professor', professorSchema);

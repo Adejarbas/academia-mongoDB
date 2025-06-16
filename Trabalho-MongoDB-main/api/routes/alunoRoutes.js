@@ -8,14 +8,15 @@ const router = express.Router();
 // Adicionar middleware de autenticação em todas as rotas
 router.use(authMiddleware);
 
-// Rotas protegidas
+// Rotas de consulta avançada (devem vir ANTES das rotas com parâmetros)
+router.get('/consulta/avancada', alunoController.getAlunosAvancado);
+router.get('/consulta/complexa', alunoController.getAlunosComplexo);
+
+// Rotas protegidas básicas
 router.get('/', alunoController.getAlunos);
 router.get('/:id', validateObjectId, alunoController.getAlunoById);
 router.post('/', validateAluno, alunoController.createAluno);
 router.put('/:id', [validateObjectId, validateAluno], alunoController.updateAluno);
 router.delete('/:id', validateObjectId, alunoController.deleteAluno);
-
-
-router.get('/consulta/avancada', alunoController.getAlunosAvancado);
 
 export default router;

@@ -110,6 +110,12 @@ export const validateProfessor = [
         .notEmpty()
         .withMessage("A especialidade é obrigatória"),
 
+    check("salario")
+        .notEmpty()
+        .withMessage("O salário é obrigatório")
+        .isFloat({ min: 0 })
+        .withMessage("O salário deve ser um número decimal positivo"),
+
     validateRequest
 ];
 
@@ -126,6 +132,18 @@ export const validateTreino = [
         .withMessage("Exercícios deve ser um array")
         .notEmpty()
         .withMessage("Deve haver pelo menos um exercício"),
+
+    check("duracao")
+        .notEmpty()
+        .withMessage("A duração é obrigatória")
+        .isInt({ min: 1 })
+        .withMessage("A duração deve ser um número inteiro positivo (em minutos)"),
+
+    check("dificuldade")
+        .notEmpty()
+        .withMessage("A dificuldade é obrigatória")
+        .isInt({ min: 1, max: 10 })
+        .withMessage("A dificuldade deve ser um número inteiro entre 1 e 10"),
 
     check("professor")
         .optional()

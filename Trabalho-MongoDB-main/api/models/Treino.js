@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const treinoSchema = new mongoose.Schema({
     nome: { 
@@ -10,7 +10,21 @@ const treinoSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Professor' 
     },
-    exercicios: [String]
+    exercicios: [String],
+    duracao: { 
+        type: Number, 
+        required: true 
+    }, // Campo inteiro (minutos)
+    dificuldade: { 
+        type: Number, 
+        min: 1, 
+        max: 10, 
+        required: true 
+    }, // Campo inteiro
+    dataCriacao: { 
+        type: Date, 
+        default: Date.now 
+    } // Campo data
 });
 
-module.exports = mongoose.model('Treino', treinoSchema);
+export default mongoose.model('Treino', treinoSchema);
