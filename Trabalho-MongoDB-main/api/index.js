@@ -14,7 +14,24 @@ import planoRoutes from './routes/planoRoutes.js'
 import planoAlunoRoutes from './routes/planoAlunoRoutes.js'
 
 const app = express()
-app.use(cors())
+
+// Verificar se está em produção (Vercel)
+const isProduction = process.env.NODE_ENV === 'production'
+
+// Configuração CORS
+if (isProduction) {
+  // CORS mais específico para produção
+  app.use(cors({
+    origin: ['https://*.vercel.app'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }))
+} else {
+  // CORS permissivo para desenvolvimento
+  app.use(cors())
+}
+
 app.use(express.json())
 
 // Caminho absoluto para a pasta public
@@ -22,10 +39,15 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const publicPath = path.join(__dirname, '../public')
 
-// Debug para Vercel
+// Debug
 console.log('📁 Current directory:', __dirname)
-console.log('📁 Public path:', publicPath)
-console.log('📁 Public path exists:', fs.existsSync(publicPath))
+console.log('🌍 Environment:', process.env.NODE_ENV)
+console.log('🏭 Is Production:', isProduction)
+
+if (!isProduction) {
+  console.log('📁 Public path:', publicPath)
+  console.log('📁 Public path exists:', fs.existsSync(publicPath))
+}
 
 // Configuração do Swagger
 let swaggerDocument
@@ -60,16 +82,41 @@ if (swaggerDocument) {
   console.log('📚 Swagger UI configurado em /api-docs')
 }
 
-// Rota raiz para servir home.html como página principal
-app.get('/', (req, res) => {
-  // #swagger.ignore = true
-  console.log('🏠 Servindo home.html para rota raiz')
-  res.sendFile(path.join(publicPath, 'home.html'))
-})
+// Configuração diferente para desenvolvimento e produção
+if (isProduction) {
+  // Em produção (Vercel), apenas rota da API
+  app.get('/', (req, res) => {
+    // #swagger.ignore = true
+    console.log('🏠 API Root accessed (Production)')
+    res.json({ 
+      message: 'Academia MongoDB API',
+      version: '1.0.0',
+      endpoints: {
+        auth: '/api/auth',
+        alunos: '/api/alunos',
+        professores: '/api/professores',
+        treinos: '/api/treinos',
+        planos: '/api/planos',
+        planoAlunos: '/api/plano-alunos',
+        docs: '/api-docs'
+      }
+    })
+  })
+} else {
+  // Em desenvolvimento, servir arquivos estáticos
+  console.log('🏠 Configurando arquivos estáticos para desenvolvimento')
+  
+  // Rota raiz para servir home.html como página principal
+  app.get('/', (req, res) => {
+    // #swagger.ignore = true
+    console.log('🏠 Servindo home.html para rota raiz')
+    res.sendFile(path.join(publicPath, 'home.html'))
+  })
 
-// Servir arquivos estáticos (HTML, CSS, JS, imagens) - SEM index automático
-// #swagger.ignore = true
-app.use(express.static(publicPath, { index: false }))
+  // Servir arquivos estáticos (HTML, CSS, JS, imagens) - SEM index automático
+  // #swagger.ignore = true
+  app.use(express.static(publicPath, { index: false }))
+}
 
 // Suas rotas de API
 app.use('/api/auth', authRoutes)

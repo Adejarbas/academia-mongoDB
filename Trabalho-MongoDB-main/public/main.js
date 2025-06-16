@@ -2,7 +2,7 @@
 const CONFIG = {
     BASE_URL: window.location.hostname === 'localhost' 
         ? 'http://localhost:3000' 
-        : 'https://trabalho-mongo-db.vercel.app',
+        : window.location.origin, // Detecta automaticamente a URL do Vercel
     TOKEN_EXPIRY_HOURS: 24,
     DEBUG: window.location.hostname === 'localhost' // Logs apenas em dev
 };
@@ -41,7 +41,13 @@ function debounce(func, wait) {
 
 // Base URL centralizada
 function getBaseUrl() {
-    return CONFIG.BASE_URL;
+    const baseUrl = CONFIG.BASE_URL;
+    if (CONFIG.DEBUG) {
+        console.log('🌐 Base URL configurada:', baseUrl);
+        console.log('🏠 Hostname atual:', window.location.hostname);
+        console.log('🔗 Origin atual:', window.location.origin);
+    }
+    return baseUrl;
 }
 
 function checkTokenExpiration() {
