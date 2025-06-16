@@ -2,6 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
+import fs from 'fs'
 import { fileURLToPath } from 'url'
 import swaggerUi from 'swagger-ui-express'
 import { connectToDatabase } from './config/db.js'
@@ -20,6 +21,11 @@ app.use(express.json())
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const publicPath = path.join(__dirname, '../public')
+
+// Debug para Vercel
+console.log('📁 Current directory:', __dirname)
+console.log('📁 Public path:', publicPath)
+console.log('📁 Public path exists:', fs.existsSync(publicPath))
 
 // Configuração do Swagger
 let swaggerDocument
@@ -54,15 +60,16 @@ if (swaggerDocument) {
   console.log('📚 Swagger UI configurado em /api-docs')
 }
 
-// Servir arquivos estáticos (HTML, CSS, JS, imagens)
-// #swagger.ignore = true
-app.use(express.static(publicPath))
-
 // Rota raiz para servir home.html como página principal
 app.get('/', (req, res) => {
   // #swagger.ignore = true
+  console.log('🏠 Servindo home.html para rota raiz')
   res.sendFile(path.join(publicPath, 'home.html'))
 })
+
+// Servir arquivos estáticos (HTML, CSS, JS, imagens) - SEM index automático
+// #swagger.ignore = true
+app.use(express.static(publicPath, { index: false }))
 
 // Suas rotas de API
 app.use('/api/auth', authRoutes)
@@ -85,11 +92,22 @@ app.use((err, req, res, next) => {
 // Handler para Vercel
 let isConnected = false
 export default async function handler(req, res) {
-  if (!isConnected) {
-    await connectToDatabase()
-    isConnected = true
+  try {
+    if (!isConnected) {
+      console.log('🔌 Conectando ao MongoDB...')
+      await connectToDatabase()
+      isConnected = true
+      console.log('✅ MongoDB conectado com sucesso!')
+    }
+    app(req, res)
+  } catch (error) {
+    console.error('❌ Erro no handler do Vercel:', error)
+    res.status(500).json({ 
+      error: true, 
+      message: 'Erro de conexão com o banco de dados',
+      details: error.message 
+    })
   }
-  app(req, res)
 }
 
 // Para desenvolvimento local
