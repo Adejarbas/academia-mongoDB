@@ -20,9 +20,16 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 // Configuração CORS
 if (isProduction) {
-  // CORS mais específico para produção
+  // CORS mais permissivo para produção no Vercel
   app.use(cors({
-    origin: ['https://*.vercel.app'],
+    origin: function (origin, callback) {
+      // Permite qualquer origem .vercel.app ou sem origem (para apps mobile)
+      if (!origin || origin.includes('.vercel.app')) {
+        callback(null, true)
+      } else {
+        callback(null, true) // Temporariamente permissivo para debug
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -33,6 +40,16 @@ if (isProduction) {
 }
 
 app.use(express.json())
+
+// Middleware de logging para debug
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.url} - ${new Date().toISOString()}`)
+  console.log('📋 Headers:', req.headers)
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('📦 Body:', req.body)
+  }
+  next()
+})
 
 // Caminho absoluto para a pasta public
 const __filename = fileURLToPath(import.meta.url)
@@ -126,6 +143,18 @@ app.use('/api/treinos', treinoRoutes)
 app.use('/api/planos', planoRoutes)
 app.use('/api/plano-alunos', planoAlunoRoutes)
 
+// Rota de health check para debug
+app.get('/api/health', (req, res) => {
+  // #swagger.ignore = true
+  console.log('🩺 Health check acessado')
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    message: 'API funcionando corretamente'
+  })
+})
+
 // Middleware de erro
 app.use((err, req, res, next) => {
   console.error(err.stack)
@@ -140,12 +169,19 @@ app.use((err, req, res, next) => {
 let isConnected = false
 export default async function handler(req, res) {
   try {
+    // Debug detalhado para Vercel
+    console.log('🔍 Vercel Handler - Método:', req.method)
+    console.log('🔍 Vercel Handler - URL:', req.url)
+    console.log('🔍 Vercel Handler - Headers:', JSON.stringify(req.headers, null, 2))
+    
     if (!isConnected) {
       console.log('🔌 Conectando ao MongoDB...')
       await connectToDatabase()
       isConnected = true
       console.log('✅ MongoDB conectado com sucesso!')
     }
+    
+    // Processar requisição através do Express
     app(req, res)
   } catch (error) {
     console.error('❌ Erro no handler do Vercel:', error)

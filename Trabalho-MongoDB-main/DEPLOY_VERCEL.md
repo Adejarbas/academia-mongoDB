@@ -50,7 +50,19 @@ projeto/
 #### API retorna 404
 - **Causa**: Rotas de API não estão sendo direcionadas corretamente
 - **Solução**: Verificar se todas as rotas começam com `/api/`
+- **Teste**: Acesse `https://seu-app.vercel.app/api/test` para verificar se a API está funcionando
 
 #### Páginas não carregam
 - **Causa**: Arquivos estáticos não estão sendo servidos
 - **Solução**: Verificar se os arquivos estão na pasta `public/`
+
+#### Debug de API
+1. Teste a rota de health check: `https://seu-app.vercel.app/api/health`
+2. Teste a rota de teste: `https://seu-app.vercel.app/api/test`
+3. Verifique os logs no dashboard do Vercel
+4. Confirme se as variáveis de ambiente estão configuradas
+
+#### Variáveis de Ambiente Obrigatórias
+- `MONGO_URI`: String de conexão do MongoDB
+- `JWT_SECRET`: Chave secreta para JWT
+- `NODE_ENV`: Deve ser "production"
