@@ -181,6 +181,13 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #8b5cf6;
 }
 
 .stat-icon {
@@ -213,6 +220,16 @@ body {
     color: #f97316;
 }
 
+.stat-card:nth-child(5) .stat-icon {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.stat-card:nth-child(6) .stat-icon {
+    background: rgba(245, 101, 101, 0.2);
+    color: #f56565;
+}
+
 .stat-info h3 {
     font-size: 2rem;
     font-weight: bold;
@@ -222,6 +239,137 @@ body {
 .stat-info p {
     color: #9ca3af;
     font-size: 0.875rem;
+}
+
+/* Detailed Stats Section */
+.detailed-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.detailed-card {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.detailed-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.detailed-header {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    padding: 1rem 1.5rem;
+    color: white;
+}
+
+.detailed-header h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.detailed-content {
+    padding: 1.5rem;
+}
+
+/* Taxa de Atendimento */
+.ratio-display {
+    text-align: center;
+}
+
+.ratio-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #8b5cf6;
+    margin-bottom: 0.5rem;
+}
+
+.ratio-label {
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+/* Atividade Recente */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid #8b5cf6;
+    margin-bottom: 0.75rem;
+    transition: background-color 0.2s ease;
+}
+
+.activity-item:hover {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.activity-item i {
+    color: #8b5cf6;
+    font-size: 0.875rem;
+    width: 16px;
+}
+
+.activity-item span {
+    color: #d1d5db;
+    font-size: 0.875rem;
+}
+
+/* Resumo do Sistema */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.summary-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.summary-label {
+    font-size: 0.8em;
+    color: #b0b0b0;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.summary-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ffffff;
 }
 
 /* Section Header */
@@ -453,18 +601,21 @@ body {
 }
 
 .status-ativo {
-    background: rgba(34, 197, 94, 0.2);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.1));
     color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .status-vencido {
-    background: rgba(239, 68, 68, 0.2);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.1));
     color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .status-cancelado {
-    background: rgba(107, 114, 128, 0.2);
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(107, 114, 128, 0.1));
     color: #6b7280;
+    border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
 /* Buttons */
@@ -710,37 +861,154 @@ body {
 
 /* Planos dos Alunos - Layout específico */
 .plano-aluno-card {
-    background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    border: 1px solid #4b5563;
+    border-radius: 16px;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.plano-aluno-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+}
+
+.plano-aluno-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    border-color: #8b5cf6;
 }
 
 .plano-aluno-info {
-    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.plano-aluno-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.plano-aluno-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .plano-aluno-info h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     margin-bottom: 0.5rem;
     color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.plano-aluno-info p {
-    color: #9ca3af;
-    margin-bottom: 0.25rem;
+.plano-aluno-info h3::before {
+    content: '👤';
+    font-size: 1.25rem;
+}
+
+.plano-aluno-info .plano-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #8b5cf6;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.plano-aluno-info .plano-name::before {
+    content: '📋';
+    font-size: 1rem;
+}
+
+.plano-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
     font-size: 0.875rem;
+}
+
+.plano-detail-item .icon {
+    width: 20px;
+    color: #8b5cf6;
+    text-align: center;
+}
+
+.plano-detail-item .label {
+    font-weight: 500;
+    color: #d1d5db;
+    min-width: 60px;
+}
+
+.plano-detail-item .value {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.price-highlight {
+    color: #10b981 !important;
+    font-size: 1.1em;
+}
+
+.date-highlight {
+    color: #06b6d4 !important;
 }
 
 .plano-aluno-actions {
     display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-end;
+    justify-content: space-between;
+    min-height: 100%;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
     gap: 0.5rem;
-    margin-left: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.status-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .status-badge {
@@ -760,6 +1028,40 @@ body {
     gap: 0.5rem;
     margin-left: 0;
     margin-top: 1rem;
+}
+
+/* Estilos para o gráfico */
+.chart-container {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#dashboard-chart {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 250px;
+}
+
+/* Efeito especial para card de planos vencendo */
+.stat-card.alert-warning {
+    animation: pulse-warning 2s infinite;
+    border: 2px solid #f56565;
+    box-shadow: 0 0 20px rgba(245, 101, 101, 0.3);
+}
+
+@keyframes pulse-warning {
+    0% {
+        box-shadow: 0 0 20px rgba(245, 101, 101, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(245, 101, 101, 0.6);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(245, 101, 101, 0.3);
+    }
 }
 
 /* Mobile Responsive */
@@ -787,10 +1089,14 @@ body {
 
     .main-content {
         margin-left: 0;
-    }
-
-    .stats-grid {
+    }    .stats-grid {
         grid-template-columns: 1fr;
+    }    .detailed-stats {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     .section-header {
@@ -818,17 +1124,28 @@ body {
         justify-content: flex-end;
     }    .planos-grid {
         grid-template-columns: 1fr;
+    }    .plano-aluno-card {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1.5rem;
+        text-align: left;
     }
 
-    .plano-aluno-card {
-        flex-direction: column;
-        text-align: center;
+    .plano-aluno-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .plano-aluno-actions {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
         margin-left: 0;
         margin-top: 1rem;
-        justify-content: center;
+    }
+
+    .action-buttons {
+        flex-direction: row;
     }
 
     .form-actions {

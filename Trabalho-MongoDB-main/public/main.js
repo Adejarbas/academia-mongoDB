@@ -580,16 +580,143 @@ function updateStats() {
             }
         });
 
+        // Calcular e atualizar receita total
+        const receitaTotal = calcularReceitaTotal();
+        const elementReceita = document.getElementById('receita-total');
+        if (elementReceita) {
+            elementReceita.textContent = `R$ ${receitaTotal.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Calcular e atualizar planos vencendo
+        const planosVencendo = calcularPlanosVencendo();
+        const elementPlanosVencendo = document.getElementById('planos-vencendo');
+        if (elementPlanosVencendo) {
+            elementPlanosVencendo.textContent = planosVencendo;
+        }        // Atualizar informações detalhadas
+        updateDetailedStats();
+
+        // Aplicar alertas visuais
+        aplicarAlertasVisuais();
+
         if (CONFIG.DEBUG) {
             console.log('📊 Estatísticas atualizadas:', {
                 alunos: data.alunos.length,
                 professores: data.professores.length,
                 treinos: data.treinos.length,
-                planos: data.planos.length
+                planos: data.planos.length,
+                receitaTotal: receitaTotal,
+                planosVencendo: planosVencendo
             });
         }
     } catch (error) {
         console.error('❌ Erro ao atualizar estatísticas:', error);
+    }
+}
+
+function updateDetailedStats() {
+    try {
+        // Atualizar resumo do sistema
+        const totalAlunos = data.alunos ? data.alunos.length : 0;
+        const totalProfessores = data.professores ? data.professores.length : 0;
+        const totalTreinos = data.treinos ? data.treinos.length : 0;
+        const totalUsuarios = totalAlunos + totalProfessores;
+        const planosAlunosAtivos = data.planosAlunos ? data.planosAlunos.filter(pa => pa.status === 'ATIVO').length : 0;
+        
+        const elementUsuarios = document.getElementById('total-usuarios');
+        if (elementUsuarios) {
+            elementUsuarios.textContent = totalUsuarios;
+        }
+
+        const elementPlanosAtivos = document.getElementById('planos-ativos');
+        if (elementPlanosAtivos) {
+            elementPlanosAtivos.textContent = data.planos ? data.planos.length : 0;
+        }
+
+        const elementPlanosAlunosCount = document.getElementById('planos-alunos-count');
+        if (elementPlanosAlunosCount) {
+            elementPlanosAlunosCount.textContent = planosAlunosAtivos;
+        }
+
+        const elementTreinosAtivos = document.getElementById('treinos-ativos');
+        if (elementTreinosAtivos) {
+            elementTreinosAtivos.textContent = totalTreinos;
+        }
+
+        // Criar/atualizar gráfico
+        createDashboardChart(
+            data.alunos || [],
+            data.professores || [],
+            data.treinos || [],
+            data.planos || []
+        );
+
+        // Atualizar atividades recentes
+        updateRecentActivity();
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar estatísticas detalhadas:', error);
+    }
+}
+
+function updateRecentActivity() {
+    const activityElement = document.getElementById('recent-activity');
+    if (!activityElement) return;
+
+    const activities = [];
+
+    // Adicionar últimos alunos (máximo 3)
+    if (data.alunos && data.alunos.length > 0) {
+        const recentAlunos = data.alunos.slice(-3);
+        recentAlunos.forEach(aluno => {
+            activities.push({
+                icon: 'fas fa-user-plus',
+                text: `Novo aluno: ${aluno.nome}`,
+                type: 'aluno'
+            });
+        });
+    }
+
+    // Adicionar últimos treinos (máximo 2)
+    if (data.treinos && data.treinos.length > 0) {
+        const recentTreinos = data.treinos.slice(-2);
+        recentTreinos.forEach(treino => {
+            activities.push({
+                icon: 'fas fa-dumbbell',
+                text: `Treino criado: ${treino.nome}`,
+                type: 'treino'
+            });
+        });
+    }
+
+    // Adicionar últimos planos (máximo 2)
+    if (data.planos && data.planos.length > 0) {
+        const recentPlanos = data.planos.slice(-2);
+        recentPlanos.forEach(plano => {
+            activities.push({
+                icon: 'fas fa-credit-card',
+                text: `Plano disponível: ${plano.nome}`,
+                type: 'plano'
+            });
+        });
+    }
+
+    // Limitar a 5 atividades máximo
+    const limitedActivities = activities.slice(-5);
+
+    if (limitedActivities.length === 0) {
+        activityElement.innerHTML = `
+            <div class="activity-item">
+                <i class="fas fa-info-circle"></i>
+                <span>Nenhuma atividade recente</span>
+            </div>
+        `;
+    } else {
+        activityElement.innerHTML = limitedActivities.map(activity => `
+            <div class="activity-item">
+                <i class="${activity.icon}"></i>
+                <span>${activity.text}</span>
+            </div>
+        `).join('');
     }
 }
 
@@ -1467,23 +1594,40 @@ function renderPlanosAlunos() {
             
             const dataInicio = planoAluno.dataInicio ? new Date(planoAluno.dataInicio).toLocaleDateString('pt-BR') : 'N/A';
             const status = planoAluno.status || 'ATIVO';
-            
-            card.innerHTML = `
+              card.innerHTML = `
                 <div class="plano-aluno-info">
-                    <h3>${alunoNome}</h3>
-                    <p><strong>Plano:</strong> ${planoNome}</p>
-                    <p><strong>Preço:</strong> R$ ${planoPreco.toFixed(2).replace('.', ',')}</p>
-                    <p><strong>Duração:</strong> ${planoDuracao} meses</p>
-                    <p><strong>Início:</strong> ${dataInicio}</p>
-                    <span class="status-badge status-${status.toLowerCase()}">${status}</span>
+                    <div class="plano-aluno-main">
+                        <h3>${alunoNome}</h3>
+                        <div class="plano-name">${planoNome}</div>
+                    </div>
+                    <div class="plano-aluno-details">
+                        <div class="plano-detail-item">
+                            <i class="fas fa-dollar-sign icon"></i>
+                            <span class="label">Preço:</span>
+                            <span class="value price-highlight">R$ ${planoPreco.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <div class="plano-detail-item">
+                            <i class="fas fa-calendar-alt icon"></i>
+                            <span class="label">Duração:</span>
+                            <span class="value">${planoDuracao} meses</span>
+                        </div>
+                        <div class="plano-detail-item">
+                            <i class="fas fa-play-circle icon"></i>
+                            <span class="label">Início:</span>
+                            <span class="value date-highlight">${dataInicio}</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="plano-aluno-actions">
-                    <button class="btn btn-secondary btn-sm" onclick="editPlanoAluno('${planoAluno._id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="deletePlanoAluno('${planoAluno._id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <span class="status-badge status-${status.toLowerCase()}">${status}</span>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary btn-sm" onclick="editPlanoAluno('${planoAluno._id}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePlanoAluno('${planoAluno._id}')" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             `;
             planosAlunosList.appendChild(card);
@@ -1809,7 +1953,7 @@ function applyAlunosFilters() {
 
     // Atualizar contador
     const countSpan = document.getElementById('alunos-count');
-    if (countSpan) {
+    if ( countSpan) {
         countSpan.textContent = `${filteredAlunos.length} aluno${filteredAlunos.length !== 1 ? 's' : ''} encontrado${filteredAlunos.length !== 1 ? 's' : ''}`;
     }
 
@@ -1936,18 +2080,27 @@ function setupProfessoresSearch() {
         filterToggle.addEventListener('click', () => {
             console.log('🔥 Toggle clicado!');
             const isVisible = filtersPanel.style.display !== 'none';
-            filtersPanel.style.display = isVisible ? 'none' : 'block';
-            filterToggle.innerHTML = isVisible ? 
-                '<i class="fas fa-filter"></i> Filtros' : 
-                '<i class="fas fa-filter"></i> Ocultar';
-            console.log('Panel agora está:', filtersPanel.style.display);
+            console.log('- Estado atual do panel:', isVisible ? 'visível' : 'oculto');
+            
+            if (isVisible) {
+                filtersPanel.style.display = 'none';
+                filterToggle.innerHTML = '<i class="fas fa-filter"></i> Mostrar Filtros';            } else {
+                filtersPanel.style.display = 'block';
+                filterToggle.innerHTML = '<i class="fas fa-filter"></i> Ocultar Filtros';
+            }            
+            console.log('🎯 PANEL DE TREINOS AGORA ESTÁ:', filtersPanel.style.display);
         });
     } else {
-        console.log('❌ Elementos de toggle não encontrados:', {
+        console.log('❌ ELEMENTOS DE TOGGLE DE TREINOS NÃO ENCONTRADOS:', {
             filterToggle: !!filterToggle,
             filtersPanel: !!filtersPanel
         });
-    }    // Limpar filtros
+        console.log('- Tentando encontrar por ID direto:');
+        console.log('- toggle-filters-treinos:', document.getElementById('toggle-filters-treinos'));
+        console.log('- treinos-filters:', document.getElementById('treinos-filters'));
+    }
+
+    // Limpar filtros
     if (clearFilters) {
         clearFilters.addEventListener('click', () => {
             searchInput.value = '';
@@ -2339,5 +2492,155 @@ async function reloadSpecificData(dataTypes = ['alunos', 'planos']) {
     } catch (error) {
         console.error('❌ Erro no recarregamento específico:', error);
         return false;
+    }
+}
+
+// Função para criar o gráfico do dashboard
+function createDashboardChart(alunos, professores, treinos, planos) {
+    const ctx = document.getElementById('dashboard-chart');
+    if (!ctx) return;
+
+    // Destruir gráfico existente se houver
+    if (window.dashboardChart) {
+        window.dashboardChart.destroy();
+    }
+
+    // Calcular planos dos alunos ativos
+    const planosAlunosAtivos = data.planosAlunos ? data.planosAlunos.filter(pa => pa.status === 'ATIVO').length : 0;    const chartData = {
+        labels: ['Alunos', 'Professores', 'Treinos', 'Planos', 'Planos Ativos'],
+        datasets: [{
+            data: [alunos.length, professores.length, treinos.length, planos.length, planosAlunosAtivos],
+            backgroundColor: [
+                'rgba(116, 82, 255, 0.8)',  // Roxo para alunos
+                'rgba(0, 194, 146, 0.8)',   // Verde para professores
+                'rgba(255, 112, 67, 0.8)',  // Laranja para treinos
+                'rgba(255, 193, 7, 0.8)',   // Amarelo para planos
+                'rgba(59, 130, 246, 0.8)'   // Azul para planos ativos
+            ],
+            borderColor: [
+                'rgba(116, 82, 255, 1)',
+                'rgba(0, 194, 146, 1)',
+                'rgba(255, 112, 67, 1)',
+                'rgba(255, 193, 7, 1)',
+                'rgba(59, 130, 246, 1)'
+            ],
+            borderWidth: 2
+        }]
+    };
+
+    const config = {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#ffffff',
+                        font: {
+                            size: 12
+                        },
+                        padding: 15
+                    }
+                }
+            }
+        }
+    };
+
+    window.dashboardChart = new Chart(ctx, config);
+}
+
+// Função para calcular dias restantes do plano
+function calcularDiasRestantes(dataInicio, duracaoMeses) {
+    if (!dataInicio || !duracaoMeses) return null;
+    
+    const inicio = new Date(dataInicio);
+    const fim = new Date(inicio);
+    fim.setMonth(fim.getMonth() + duracaoMeses);
+    
+    const hoje = new Date();
+    const diffTime = fim - hoje;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+}
+
+// Função para obter classe de status baseada nos dias restantes
+function getStatusClass(diasRestantes) {
+    if (diasRestantes === null) return 'status-ativo';
+    if (diasRestantes < 0) return 'status-vencido';
+    if (diasRestantes <= 7) return 'status-expirando';
+    return 'status-ativo';
+}
+
+// Função para calcular receita total dos planos ativos
+function calcularReceitaTotal() {
+    if (!data.planosAlunos || data.planosAlunos.length === 0) return 0;
+    
+    let receitaTotal = 0;
+    
+    data.planosAlunos.forEach(planoAluno => {
+        // Verificar se o plano está ativo
+        if (planoAluno.status === 'ATIVO') {
+            // Buscar o plano correspondente
+            const planoId = planoAluno.plano || planoAluno.planoId;
+            const plano = data.planos.find(p => p._id.toString() === planoId.toString());
+            
+            if (plano && plano.preco) {
+                receitaTotal += parseFloat(plano.preco);
+            }
+        }
+    });
+    
+    return receitaTotal;
+}
+
+// Função para calcular quantos planos vencem nos próximos 7 dias
+function calcularPlanosVencendo() {
+    if (!data.planosAlunos || data.planosAlunos.length === 0) return 0;
+    
+    let planosVencendo = 0;
+    const hoje = new Date();
+    const seteDiasAFrente = new Date();
+    seteDiasAFrente.setDate(hoje.getDate() + 7);
+    
+    data.planosAlunos.forEach(planoAluno => {
+        if (planoAluno.status === 'ATIVO' && planoAluno.dataInicio) {
+            // Buscar o plano correspondente para pegar a duração
+            const planoId = planoAluno.plano || planoAluno.planoId;
+            const plano = data.planos.find(p => p._id.toString() === planoId.toString());
+            
+            if (plano && plano.duracaoMeses) {
+                const dataInicio = new Date(planoAluno.dataInicio);
+                const dataVencimento = new Date(dataInicio);
+                dataVencimento.setMonth(dataVencimento.getMonth() + parseInt(plano.duracaoMeses));
+                
+                // Verificar se vence nos próximos 7 dias
+                if (dataVencimento >= hoje && dataVencimento <= seteDiasAFrente) {
+                    planosVencendo++;
+                }
+            }
+        }
+    });
+    
+    return planosVencendo;
+}
+
+// Função para aplicar alerta visual nos cards
+function aplicarAlertasVisuais() {
+    // Remover classes de alerta existentes
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.classList.remove('alert-warning');
+    });
+
+    // Aplicar alerta se há planos vencendo
+    const planosVencendo = calcularPlanosVencendo();
+    if (planosVencendo > 0) {
+        const cardPlanosVencendo = document.getElementById('planos-vencendo')?.closest('.stat-card');
+        if (cardPlanosVencendo) {
+            cardPlanosVencendo.classList.add('alert-warning');
+        }
     }
 }

@@ -90,14 +90,75 @@
                                 <h3 id="total-treinos"></h3>
                                 <p>Treinos Este Mês</p>
                             </div>
+                        </div>                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>                            <div class="stat-info">
+                                <h3 id="total-planos">0</h3>
+                                <p>Planos Disponíveis</p>
+                            </div>
                         </div>
+
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-dollar-sign"></i>
                             </div>
                             <div class="stat-info">
-                                <h3>+8%</h3>
-                                <p>Crescimento</p>
+                                <h3 id="receita-total">R$ 0,00</h3>
+                                <p>Receita Total</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="planos-vencendo">0</h3>
+                                <p>Planos Vencendo</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cards de Informações Detalhadas -->
+                    <div class="detailed-stats">                        <div class="detailed-card">
+                            <div class="detailed-header">
+                                <h4><i class="fas fa-clock"></i> Atividade Recente</h4>
+                            </div>
+                            <div class="detailed-content">
+                                <div class="activity-list" id="recent-activity">
+                                    <div class="activity-item">
+                                        <i class="fas fa-circle-notch fa-spin"></i>
+                                        <span>Carregando atividades...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detailed-card">
+                            <div class="detailed-header">
+                                <h4><i class="fas fa-chart-pie"></i> Resumo do Sistema</h4>
+                            </div>
+                            <div class="detailed-content">
+                                <div class="summary-grid">
+                                    <div class="summary-item">
+                                        <span class="summary-label">Total de Usuários</span>
+                                        <span class="summary-value" id="total-usuarios">0</span>
+                                    </div>                                    <div class="summary-item">
+                                        <span class="summary-label">Planos Ativos</span>
+                                        <span class="summary-value" id="planos-ativos">0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span class="summary-label">Planos dos Alunos</span>
+                                        <span class="summary-value" id="planos-alunos-count">0</span>
+                                    </div><div class="summary-item">
+                                        <span class="summary-label">Treinos Ativos</span>
+                                        <span class="summary-value" id="treinos-ativos">0</span>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="dashboard-chart" width="300" height="200"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -556,8 +617,8 @@
                 console.log('✅ Dashboard exibido');
             } else {
                 console.error('❌ Elemento dashboard não encontrado');
-            }
-        });
+            }        });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
