@@ -175,3 +175,49 @@ export const validatePlano = [
 
     validateRequest
 ];
+
+// Validações para Autenticação
+export const validateAuth = [
+    check("name")
+        .notEmpty()
+        .withMessage("O nome é obrigatório")
+        .isLength({ min: 2, max: 100 })
+        .withMessage("O nome deve ter entre 2 e 100 caracteres"),
+
+    check("email")
+        .notEmpty()
+        .withMessage("O email é obrigatório")
+        .isEmail()
+        .withMessage("Email inválido")
+        .custom(async (email, { req }) => {
+            const db = getDb();
+            const existe = await db.collection("users").countDocuments({ email });
+            if (existe > 0) {
+                throw new Error("Este email já está cadastrado");
+            }
+            return true;
+        }),
+
+    check("password")
+        .notEmpty()
+        .withMessage("A senha é obrigatória")
+        .isLength({ min: 6 })
+        .withMessage("A senha deve ter pelo menos 6 caracteres"),
+
+    validateRequest
+];
+
+// Validações para Login
+export const validateLogin = [
+    check("email")
+        .notEmpty()
+        .withMessage("O email é obrigatório")
+        .isEmail()
+        .withMessage("Email inválido"),
+
+    check("password")
+        .notEmpty()
+        .withMessage("A senha é obrigatória"),
+
+    validateRequest
+];
