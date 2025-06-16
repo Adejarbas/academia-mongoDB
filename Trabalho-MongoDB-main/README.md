@@ -2,13 +2,6 @@
 
 Sistema completo para gerenciamento de academias, desenvolvido como trabalho prático para a disciplina de Banco de Dados com MongoDB.
 
-## 💡 Propósito
-
-Este projeto tem como objetivo demonstr- ✅ **Validação**: Todos os dados são validados com express-validator
-- ✅ **Segurança**: Senhas criptografadas com bcrypt
-- ✅ **Modularização**: Código organizado em controllers, models, routes e middlewares
-- ✅ **Documentação**: API documentada com Swagger UI interativo
-- ✅ **Testes**: 46 testes unitários implementados com Jesta criação de uma aplicação web fullstack utilizando Node.js, Express, MongoDB e um frontend em HTML, CSS e JavaScript puro. O sistema permite o cadastro, consulta, edição e exclusão de alunos, professores, treinos e planos, além de consultas avançadas com operadores MongoDB e validação completa de dados.
 
 ### 🎯 Funcionalidades Principais
 
@@ -19,10 +12,6 @@ Este projeto tem como objetivo demonstr- ✅ **Validação**: Todos os dados sã
 - ✅ Interface web responsiva e moderna
 - ✅ API RESTful documentada
 
-## 👥 Integrantes
-
-- **Daniel Rodrigues Lopes Adejarbas** - [GitHub](https://github.com/Adejarbas)
-- **Taise Miguel Rodrigues** - [GitHub](https://github.com/TaiseMiguel)
 
 ## 🌐 Status de Hospedagem
 
