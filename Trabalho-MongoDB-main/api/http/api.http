@@ -4,8 +4,12 @@
 1. Instale a extensão REST Client no VS Code
 2. Substitua os IDs pelos IDs reais dos registros
 3. Configure o token de autenticação nas variáveis
+4. Escolha o ambiente descomentando a linha apropriada
 
-@baseUrl = https://trabalho-mongo-db.vercel.app
+### CONFIGURAÇÃO - Escolha um dos ambientes:
+@baseUrl = http://localhost:3000
+# @baseUrl = https://trabalho-mongo-db.vercel.app
+
 @token = SEU_TOKEN_AQUI
 
 # ====================
@@ -13,23 +17,23 @@
 # ====================
 
 ### Listar todos os alunos
-GET {{baseUrl}}/alunos
+GET {{baseUrl}}/api/alunos
 Authorization: Bearer {{token}}
 
 ### Buscar aluno por ID
-GET {{baseUrl}}/alunos/ID_DO_ALUNO
+GET {{baseUrl}}/api/alunos/ID_DO_ALUNO
 Authorization: Bearer {{token}}
 
 ### Consulta avançada de alunos (operadores $gt)
-GET {{baseUrl}}/alunos/consulta/avancada?idade=20&peso=65
+GET {{baseUrl}}/api/alunos/consulta/avancada?idade=20&peso=65
 Authorization: Bearer {{token}}
 
 ### Consulta complexa de alunos (múltiplos operadores: $or, $and, $gte, $lt, $in)
-GET {{baseUrl}}/alunos/consulta/complexa?pesoMin=60&pesoMax=90&idades=18,25,30&nomes=João,Maria
+GET {{baseUrl}}/api/alunos/consulta/complexa?pesoMin=60&pesoMax=90&idades=18,25,30&nomes=João,Maria
 Authorization: Bearer {{token}}
 
 ### Criar novo aluno
-POST {{baseUrl}}/alunos
+POST {{baseUrl}}/api/alunos
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -44,7 +48,7 @@ Content-Type: application/json
 }
 
 ### Atualizar aluno
-PUT {{baseUrl}}/alunos/ID_DO_ALUNO
+PUT {{baseUrl}}/api/alunos/ID_DO_ALUNO
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -58,7 +62,7 @@ Content-Type: application/json
 }
 
 ### Deletar aluno
-DELETE {{baseUrl}}/alunos/ID_DO_ALUNO
+DELETE {{baseUrl}}/api/alunos/ID_DO_ALUNO
 Authorization: Bearer {{token}}
 
 # ====================
@@ -66,15 +70,15 @@ Authorization: Bearer {{token}}
 # ====================
 
 ### Listar todos os professores
-GET {{baseUrl}}/professores
+GET {{baseUrl}}/api/professores
 Authorization: Bearer {{token}}
 
 ### Buscar professor por ID
-GET {{baseUrl}}/professores/ID_DO_PROFESSOR
+GET {{baseUrl}}/api/professores/ID_DO_PROFESSOR
 Authorization: Bearer {{token}}
 
 ### Criar novo professor
-POST {{baseUrl}}/professores
+POST {{baseUrl}}/api/professores
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -86,7 +90,7 @@ Content-Type: application/json
 }
 
 ### Atualizar professor
-PUT {{baseUrl}}/professores/ID_DO_PROFESSOR
+PUT {{baseUrl}}/api/professores/ID_DO_PROFESSOR
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -98,7 +102,7 @@ Content-Type: application/json
 }
 
 ### Deletar professor
-DELETE {{baseUrl}}/professores/ID_DO_PROFESSOR
+DELETE {{baseUrl}}/api/professores/ID_DO_PROFESSOR
 Authorization: Bearer {{token}}
 
 # ====================
@@ -106,15 +110,15 @@ Authorization: Bearer {{token}}
 # ====================
 
 ### Listar todos os treinos
-GET {{baseUrl}}/treinos
+GET {{baseUrl}}/api/treinos
 Authorization: Bearer {{token}}
 
 ### Buscar treino por ID
-GET {{baseUrl}}/treinos/ID_DO_TREINO
+GET {{baseUrl}}/api/treinos/ID_DO_TREINO
 Authorization: Bearer {{token}}
 
 ### Criar novo treino
-POST {{baseUrl}}/treinos
+POST {{baseUrl}}/api/treinos
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -126,7 +130,7 @@ Content-Type: application/json
 }
 
 ### Atualizar treino
-PUT {{baseUrl}}/treinos/ID_DO_TREINO
+PUT {{baseUrl}}/api/treinos/ID_DO_TREINO
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -137,7 +141,7 @@ Content-Type: application/json
 }
 
 ### Deletar treino
-DELETE {{baseUrl}}/treinos/ID_DO_TREINO
+DELETE {{baseUrl}}/api/treinos/ID_DO_TREINO
 Authorization: Bearer {{token}}
 
 # ====================
@@ -145,15 +149,15 @@ Authorization: Bearer {{token}}
 # ====================
 
 ### Listar todos os planos
-GET {{baseUrl}}/planos
+GET {{baseUrl}}/api/planos
 Authorization: Bearer {{token}}
 
 ### Buscar plano por ID
-GET {{baseUrl}}/planos/ID_DO_PLANO
+GET {{baseUrl}}/api/planos/ID_DO_PLANO
 Authorization: Bearer {{token}}
 
 ### Criar novo plano
-POST {{baseUrl}}/planos
+POST {{baseUrl}}/api/planos
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -165,7 +169,7 @@ Content-Type: application/json
 }
 
 ### Atualizar plano
-PUT {{baseUrl}}/planos/ID_DO_PLANO
+PUT {{baseUrl}}/api/planos/ID_DO_PLANO
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -177,15 +181,70 @@ Content-Type: application/json
 }
 
 ### Deletar plano
-DELETE {{baseUrl}}/planos/ID_DO_PLANO
+DELETE {{baseUrl}}/api/planos/ID_DO_PLANO
 Authorization: Bearer {{token}}
 
 # ====================
-# 🔐 AUTENTICAÇÃO
+# 🔗 PLANO-ALUNOS (Relacionamentos)
+# ====================
+
+### Listar todos os relacionamentos plano-aluno
+GET {{baseUrl}}/api/plano-alunos
+Authorization: Bearer {{token}}
+
+### Buscar relacionamento por ID
+GET {{baseUrl}}/api/plano-alunos/ID_DO_RELACIONAMENTO
+Authorization: Bearer {{token}}
+
+### Associar aluno a um plano
+POST {{baseUrl}}/api/plano-alunos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alunoId": "674c38e81ae411a6b7c00b65",
+  "planoId": "674c38e81ae411a6b7c00b66",
+  "dataInicio": "2025-01-15",
+  "dataFim": "2026-01-15",
+  "ativo": true,
+  "observacoes": "Plano anual com desconto"
+}
+
+### Atualizar relacionamento plano-aluno
+PUT {{baseUrl}}/api/plano-alunos/ID_DO_RELACIONAMENTO
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "dataFim": "2026-06-15",
+  "ativo": false,
+  "observacoes": "Plano cancelado por solicitação do cliente"
+}
+
+### Remover aluno de um plano
+DELETE {{baseUrl}}/api/plano-alunos/ID_DO_RELACIONAMENTO
+Authorization: Bearer {{token}}
+
+# ====================
+# � STATUS DA API
+# ====================
+
+### Verificar status da API
+GET {{baseUrl}}/api/status
+
+### Health Check completo
+GET {{baseUrl}}/api/status/health
+
+### Verificar conexão com MongoDB
+GET {{baseUrl}}/api/status/database
+Authorization: Bearer {{token}}
+
+# ====================
+# �🔐 AUTENTICAÇÃO
 # ====================
 
 ### Registrar usuário
-POST {{baseUrl}}/auth/register
+POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
@@ -195,7 +254,7 @@ Content-Type: application/json
 }
 
 ### Login
-POST {{baseUrl}}/auth/login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
