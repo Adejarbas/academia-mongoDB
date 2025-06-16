@@ -4,7 +4,11 @@ Sistema completo para gerenciamento de academias, desenvolvido como trabalho pr�
 
 ## 💡 Propósito
 
-Este projeto tem como objetivo demonstrar a criação de uma aplicação web fullstack utilizando Node.js, Express, MongoDB e um frontend em HTML, CSS e JavaScript puro. O sistema permite o cadastro, consulta, edição e exclusão de alunos, professores, treinos e planos, além de consultas avançadas com operadores MongoDB e validação completa de dados.
+Este projeto tem como objetivo demonstr- ✅ **Validação**: Todos os dados são validados com express-validator
+- ✅ **Segurança**: Senhas criptografadas com bcrypt
+- ✅ **Modularização**: Código organizado em controllers, models, routes e middlewares
+- ✅ **Documentação**: API documentada com Swagger UI interativo
+- ✅ **Testes**: 46 testes unitários implementados com Jesta criação de uma aplicação web fullstack utilizando Node.js, Express, MongoDB e um frontend em HTML, CSS e JavaScript puro. O sistema permite o cadastro, consulta, edição e exclusão de alunos, professores, treinos e planos, além de consultas avançadas com operadores MongoDB e validação completa de dados.
 
 ### 🎯 Funcionalidades Principais
 
@@ -185,6 +189,21 @@ GET /alunos/consulta/complexa?pesoMin=60&pesoMax=90&idades=18,25,30&nomes=João,
 
 ## 🧪 Testando a API
 
+### 📖 Documentação Swagger (Recomendado)
+**Interface interativa completa com todos os endpoints:**
+```
+http://localhost:3000/api-docs
+```
+
+**Funcionalidades da documentação:**
+- ✅ **Interface visual** moderna e responsiva
+- ✅ **Teste integrado** (Try it out) para cada endpoint
+- ✅ **Autenticação JWT** pré-configurada
+- ✅ **Exemplos práticos** de request/response
+- ✅ **Esquemas de dados** detalhados
+- ✅ **Códigos de status** e mensagens de erro
+- ✅ **Filtros por categoria** (Alunos, Professores, etc.)
+
 ### Usando REST Client (VS Code)
 1. Instale a extensão "REST Client"
 2. Abra o arquivo `api/http/api.http`
@@ -193,6 +212,22 @@ GET /alunos/consulta/complexa?pesoMin=60&pesoMax=90&idades=18,25,30&nomes=João,
 ### Usando Postman/Insomnia
 - Importe a collection ou use os endpoints documentados
 - Configure a autenticação Bearer Token após login
+
+## 🛠️ Comandos Úteis
+
+```bash
+# Iniciar servidor de desenvolvimento
+npm run dev
+
+# Gerar/atualizar documentação Swagger
+npm run swagger
+
+# Executar testes unitários
+npm test
+
+# Executar testes com cobertura
+npm run test:coverage
+```
 
 ## 📝 Observações Técnicas
 
